@@ -1,5 +1,5 @@
-import darkLogo from "/assets/logo-darktheme.png";
-import lightLogo from "/assets/logo-lighttheme.png";
+import darkLogo from '../assets/logo-darktheme.png';
+import lightLogo from '../assets/logo-lighttheme.png';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Store,
@@ -1280,15 +1280,11 @@ export default function App() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 <div
-  onClick={() => navigateToPage('home')}
+  onClick={() => navigateToPage('dispatch')}
   className="flex items-center gap-2.5 cursor-pointer select-none"
 >
   <img
-    src={
-      theme === 'dark'
-        ? '/assets/logo-darktheme.png'
-        : '/assets/logo-lighttheme.png'
-    }
+    src={theme === 'dark' ? darkLogo : lightLogo}
     alt="ShelfBridge Logo"
     className="h-16 w-auto object-contain"
   />

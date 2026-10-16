@@ -429,13 +429,13 @@ const DEMO_STEPS = [
 ];
 
 const PAGES_NAVIGATION = [
+  { id: 'home', label: 'Overview', shortLabel: 'Overview', icon: Home, desc: 'System overview & problem context' },
   { id: 'dispatch', label: 'Coordination Desk', shortLabel: 'Dispatch', icon: Zap, desc: 'Live requests, stock matches & order fulfilment' },
   { id: 'capture', label: 'Log Stockout', shortLabel: 'Log Request', icon: Plus, desc: 'Quick customer request entry & barcode scan' },
   { id: 'inventory', label: 'Inventory & Catalogue', shortLabel: 'Inventory', icon: Package, desc: 'Multi-store shelf availability & specifications' },
   { id: 'network', label: 'Store Network', shortLabel: 'Network', icon: Building2, desc: 'Partner stores in Nehru Place cluster' },
   { id: 'demand', label: 'Demand & Insights', shortLabel: 'Insights', icon: BarChart3, desc: 'Unmet demand patterns & stockout trends' },
-  { id: 'economics', label: 'Unit Economics', shortLabel: 'Economics', icon: IndianRupee, desc: 'Contribution margin waterfall & revenue' },
-  { id: 'home', label: 'Overview', shortLabel: 'Overview', icon: Home, desc: 'System overview & problem context' }
+  { id: 'economics', label: 'Unit Economics', shortLabel: 'Economics', icon: IndianRupee, desc: 'Contribution margin waterfall & revenue' }
 ];
 
 const STATUS_META = {
@@ -465,8 +465,8 @@ export default function App() {
   // Active Store Perspective: 'store-a' | 'store-b' | 'store-c' | 'network'
   const [activeStoreId, setActiveStoreId] = useState('store-a');
 
-  // Multi-Page Navigation State (defaults directly to live Coordination Desk)
-  const [activeTab, setActiveTab] = useState('dispatch');
+  // Multi-Page Navigation State (defaults directly to Overview)
+  const [activeTab, setActiveTab] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Core Domain State
@@ -1280,7 +1280,7 @@ export default function App() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 <div
-  onClick={() => navigateToPage('dispatch')}
+  onClick={() => navigateToPage('home')}
   className="flex items-center gap-2.5 cursor-pointer select-none"
 >
   <img

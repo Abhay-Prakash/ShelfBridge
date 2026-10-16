@@ -1,3 +1,5 @@
+import darkLogo from "/assets/logo-darktheme.png";
+import lightLogo from "/assets/logo-lighttheme.png";
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Store,
@@ -1277,23 +1279,20 @@ export default function App() {
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-
-            <div
-              onClick={() => navigateToPage('dispatch')}
-              className="flex items-center gap-2.5 cursor-pointer select-none"
-            >
-              <div className="w-8 h-8 rounded-lg bg-[#0071E3] flex items-center justify-center text-white font-semibold text-sm shadow-xs">
-                SB
-              </div>
-              <div>
-                <div className={`font-semibold tracking-tight text-sm sm:text-base ${ui.textPrimary} leading-tight`}>
-                  ShelfBridge
-                </div>
-                <p className={`text-[11px] hidden sm:block ${ui.mutedText}`}>
-                  Inventory Coordination Network
-                </p>
-              </div>
-            </div>
+<div
+  onClick={() => navigateToPage('dispatch')}
+  className="flex items-center gap-2.5 cursor-pointer select-none"
+>
+  <img
+    src={
+      theme === 'dark'
+        ? '/assets/logo-darktheme.png'
+        : '/assets/logo-lighttheme.png'
+    }
+    alt="ShelfBridge Logo"
+    className="h-16 w-auto object-contain"
+  />
+</div>
           </div>
 
           {/* Right: Primary Action + Theme Toggle */}

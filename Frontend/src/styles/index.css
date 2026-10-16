@@ -1,24 +1,50 @@
+:root {
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Inter", system-ui, -apple-system, sans-serif;
+}
+
+* {
+  font-family: var(--font-apple);
+  letter-spacing: -0.011em;
+}
+
+body {
+  font-family: var(--font-apple);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark, html.dark body {
+  background-color: #000000;
+  color: #F5F5F7;
+}
+
+html:not(.dark), html:not(.dark) body {
+  background-color: #F5F5F7;
+  color: #1D1D1F;
+}
+
+/* Override monospace so AI-terminal looking font is replaced by clean Apple type */
+.font-mono, code, kbd, samp {
+  font-family: var(--font-apple) !important;
+  letter-spacing: -0.01em;
+}
+
 @keyframes pulseSubtle {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
 }
 @keyframes slideInUp {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
+  
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes laserScan {
-  0%, 100% { transform: translateY(0%); opacity: 0.85; }
-  50% { transform: translateY(100%); opacity: 0.35; }
-}
 .animate-slide-up {
-  animation: slideInUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .pulse-dot {
   animation: pulseSubtle 2s infinite ease-in-out;
 }
-.laser-line {
-  animation: laserScan 2.2s infinite ease-in-out;
-}
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+

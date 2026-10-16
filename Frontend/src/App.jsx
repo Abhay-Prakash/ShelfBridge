@@ -223,7 +223,7 @@ const INITIAL_INVENTORY = [
   { id: 'inv-b4', storeId: 'store-b', productId: 'prod-5', onHand: 3, reserved: 0, transferPrice: 1550, acquisitionCost: 1310, lastUpdated: '5 mins ago' },
 
   { id: 'inv-c1', storeId: 'store-c', productId: 'prod-3', onHand: 5, reserved: 0, transferPrice: 780, acquisitionCost: 640, lastUpdated: '6 mins ago' },
-  { id: 'inv-c2', storeId: 'store-c', productId: 'prod-2', productId: 'prod-2', onHand: 1, reserved: 0, transferPrice: 1140, acquisitionCost: 960, lastUpdated: '14 mins ago' },
+  { id: 'inv-c2', storeId: 'store-c', productId: 'prod-2', onHand: 1, reserved: 0, transferPrice: 1140, acquisitionCost: 960, lastUpdated: '14 mins ago' },
   { id: 'inv-c3', storeId: 'store-c', productId: 'prod-4', onHand: 6, reserved: 0, transferPrice: 710, acquisitionCost: 580, lastUpdated: '3 mins ago' },
   { id: 'inv-c4', storeId: 'store-c', productId: 'prod-6', onHand: 3, reserved: 0, transferPrice: 1130, acquisitionCost: 950, lastUpdated: '11 mins ago' }
 ];
@@ -427,38 +427,44 @@ const DEMO_STEPS = [
 ];
 
 const PAGES_NAVIGATION = [
-  { id: 'home', label: 'Overview & Pitch', shortLabel: 'Home', badge: 'Sec 1–4', icon: Home, desc: 'Problem, value prop & guided walkthrough' },
-  { id: 'dispatch', label: 'Coordination Desk', shortLabel: 'Dispatch', badge: 'Live MVP', icon: Zap, desc: 'End-to-end request to fulfilment desk' },
-  { id: 'capture', label: 'Request Capture Studio', shortLabel: 'Capture', badge: 'Surface A', icon: ScanLine, desc: 'Fast entry, barcode & Hinglish AI parser' },
-  { id: 'matching', label: '4-Stage Match Inspector', shortLabel: 'Matcher', badge: 'Surface B', icon: ShieldCheck, desc: 'Exact SKU vs 45W lookalike safeguards' },
-  { id: 'reservations', label: 'Offers & Atomic Holds', shortLabel: 'Holds', badge: 'Surface C', icon: Lock, desc: 'Live timers, row locks & handover OTP' },
-  { id: 'inventory', label: 'Multi-Store Inventory', shortLabel: 'Stock', badge: '3 Stores', icon: Package, desc: 'Catalogue, stock ledger & CSV sync' },
-  { id: 'network', label: 'Store Network & Pilot', shortLabel: 'Stores', badge: 'Sec 5.5', icon: Building2, desc: 'Nehru Place cluster map & store onboarding' },
-  { id: 'demand', label: 'Network Demand Insights', shortLabel: 'Demand', badge: 'Surface E', icon: BarChart3, desc: 'Privacy-safe aggregate unmet SKU trends' },
-  { id: 'economics', label: 'Unit Economics & API', shortLabel: 'Economics', badge: 'Sec 5–10', icon: IndianRupee, desc: 'Contribution waterfall, ROI & FastAPI spec' }
+  { id: 'dispatch', label: 'Coordination Desk', shortLabel: 'Dispatch', icon: Zap, desc: 'Live requests, stock matches & order fulfilment' },
+  { id: 'capture', label: 'Log Stockout', shortLabel: 'Log Request', icon: Plus, desc: 'Quick customer request entry & barcode scan' },
+  { id: 'inventory', label: 'Inventory & Catalogue', shortLabel: 'Inventory', icon: Package, desc: 'Multi-store shelf availability & specifications' },
+  { id: 'network', label: 'Store Network', shortLabel: 'Network', icon: Building2, desc: 'Partner stores in Nehru Place cluster' },
+  { id: 'demand', label: 'Demand & Insights', shortLabel: 'Insights', icon: BarChart3, desc: 'Unmet demand patterns & stockout trends' },
+  { id: 'economics', label: 'Unit Economics', shortLabel: 'Economics', icon: IndianRupee, desc: 'Contribution margin waterfall & revenue' },
+  { id: 'home', label: 'Overview', shortLabel: 'Overview', icon: Home, desc: 'System overview & problem context' }
 ];
 
 const STATUS_META = {
-  open: { label: 'OPEN REQUEST', bg: 'bg-stone-200 text-stone-800 border-stone-400', darkBg: 'bg-zinc-800 text-zinc-200 border-zinc-600' },
-  matched: { label: 'CANDIDATES MATCHED', bg: 'bg-amber-100 text-amber-900 border-amber-400', darkBg: 'bg-amber-950/70 text-amber-300 border-amber-700' },
-  awaiting_supplier: { label: 'AWAITING SUPPLIER', bg: 'bg-orange-100 text-orange-900 border-orange-400', darkBg: 'bg-orange-950/70 text-orange-300 border-orange-700' },
-  offered: { label: 'OFFER CONFIRMED', bg: 'bg-sky-100 text-sky-900 border-sky-400', darkBg: 'bg-sky-950/70 text-sky-300 border-sky-700' },
-  reserved: { label: 'STOCK RESERVED (ATOMIC)', bg: 'bg-indigo-100 text-indigo-900 border-indigo-400', darkBg: 'bg-indigo-950/70 text-indigo-300 border-indigo-700' },
-  fulfilled: { label: 'SALE RECOVERED', bg: 'bg-emerald-100 text-emerald-900 border-emerald-500', darkBg: 'bg-emerald-950/70 text-emerald-300 border-emerald-700' },
-  cancelled: { label: 'CANCELLED (RELEASED)', bg: 'bg-rose-100 text-rose-900 border-rose-400', darkBg: 'bg-rose-950/70 text-rose-300 border-rose-700' },
-  expired: { label: 'HOLD EXPIRED', bg: 'bg-stone-200 text-stone-600 border-stone-400', darkBg: 'bg-zinc-800 text-zinc-400 border-zinc-700' },
-  unfulfilled: { label: 'UNFULFILLED', bg: 'bg-rose-100 text-rose-900 border-rose-400', darkBg: 'bg-rose-950/70 text-rose-300 border-rose-700' }
+  open: { label: 'Open Request', bg: 'bg-stone-100 text-stone-700 border-stone-200/80', darkBg: 'bg-zinc-800 text-zinc-300 border-zinc-700' },
+  matched: { label: 'Matches Found', bg: 'bg-blue-50 text-[#0071E3] border-blue-200/80', darkBg: 'bg-blue-950/40 text-blue-300 border-blue-800' },
+  awaiting_supplier: { label: 'Awaiting Supplier', bg: 'bg-amber-50 text-amber-800 border-amber-200/80', darkBg: 'bg-amber-950/40 text-amber-300 border-amber-800' },
+  offered: { label: 'Offer Confirmed', bg: 'bg-sky-50 text-sky-800 border-sky-200/80', darkBg: 'bg-sky-950/40 text-sky-300 border-sky-800' },
+  reserved: { label: 'Stock Reserved', bg: 'bg-indigo-50 text-indigo-800 border-indigo-200/80', darkBg: 'bg-indigo-950/40 text-indigo-300 border-indigo-800' },
+  fulfilled: { label: 'Sale Recovered', bg: 'bg-emerald-50 text-emerald-800 border-emerald-200/80', darkBg: 'bg-emerald-950/40 text-emerald-300 border-emerald-800' },
+  cancelled: { label: 'Cancelled', bg: 'bg-rose-50 text-rose-800 border-rose-200/80', darkBg: 'bg-rose-950/40 text-rose-300 border-rose-800' },
+  expired: { label: 'Hold Expired', bg: 'bg-stone-100 text-stone-600 border-stone-200/80', darkBg: 'bg-zinc-800 text-zinc-400 border-zinc-700' },
+  unfulfilled: { label: 'Unfulfilled', bg: 'bg-rose-50 text-rose-800 border-rose-200/80', darkBg: 'bg-rose-950/40 text-rose-300 border-rose-800' }
 };
 
 export default function App() {
-  const [theme, setTheme] = useState('ledger');
-  const isDark = theme === 'terminal';
+  const [theme, setTheme] = useState('dark');
+  const isDark = theme === 'dark';
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   // Active Store Perspective: 'store-a' | 'store-b' | 'store-c' | 'network'
   const [activeStoreId, setActiveStoreId] = useState('store-a');
 
-  // Multi-Page Navigation State (9 full responsive pages)
-  const [activeTab, setActiveTab] = useState('home');
+  // Multi-Page Navigation State (defaults directly to live Coordination Desk)
+  const [activeTab, setActiveTab] = useState('dispatch');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Core Domain State
@@ -1238,213 +1244,93 @@ export default function App() {
   }, [inventory, stores, catalogue, invStoreFilter, invCategoryFilter, invSearch]);
 
   const ui = {
-    pageBg: isDark ? 'bg-[#0C0E12] text-zinc-100' : 'bg-[#F4F1EA] text-[#16181D]',
-    headerBg: isDark ? 'bg-[#12151B] border-zinc-800' : 'bg-[#FCFBF8] border-[#DCD6C8]',
-    sidebarBg: isDark ? 'bg-[#101319] border-zinc-800' : 'bg-[#FAF8F3] border-[#DCD6C8]',
-    cardBg: isDark ? 'bg-[#151921] border-zinc-800/90' : 'bg-white border-[#DED8CA]',
-    subCardBg: isDark ? 'bg-[#1B202B] border-zinc-700/80' : 'bg-[#F9F7F2] border-[#E5E0D4]',
-    mutedText: isDark ? 'text-zinc-400' : 'text-stone-600',
-    faintText: isDark ? 'text-zinc-500' : 'text-stone-500',
-    borderCol: isDark ? 'border-zinc-800' : 'border-[#DED8CA]',
-    accentBtn: 'bg-[#C84B20] hover:bg-[#B03E17] text-white shadow-sm transition-all duration-150',
+    pageBg: isDark ? 'bg-[#000000] text-[#F5F5F7]' : 'bg-[#F5F5F7] text-[#1D1D1F]',
+    headerBg: isDark ? 'bg-[#1C1C1E]/90 border-white/[0.08]' : 'bg-white/85 border-black/[0.06]',
+    sidebarBg: isDark ? 'bg-[#1C1C1E] border-white/[0.08]' : 'bg-white border-black/[0.06]',
+    cardBg: isDark ? 'bg-[#1C1C1E] border-white/[0.08]' : 'bg-white border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.03)]',
+    subCardBg: isDark ? 'bg-[#2C2C2E] border-white/[0.06]' : 'bg-[#F9F9FB] border-black/[0.04]',
+    textPrimary: isDark ? 'text-white' : 'text-[#1D1D1F]',
+    mutedText: isDark ? 'text-[#8E8E93]' : 'text-[#86868B]',
+    faintText: isDark ? 'text-[#636366]' : 'text-[#A1A1A6]',
+    borderCol: isDark ? 'border-white/[0.08]' : 'border-black/[0.06]',
+    accentBtn: 'bg-[#0071E3] hover:bg-[#0077ED] text-white shadow-xs rounded-xl font-medium transition-all duration-150',
     secondaryBtn: isDark
-      ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700'
-      : 'bg-[#EFECE4] hover:bg-[#E4DFD3] text-stone-900 border border-[#D5CFC0]'
+      ? 'bg-[#2C2C2E] hover:bg-[#3A3A3C] text-white border border-white/[0.08] rounded-xl'
+      : 'bg-black/[0.04] hover:bg-black/[0.07] text-[#1D1D1F] border border-black/[0.06] rounded-xl'
   };
 
   const currentPageMeta = PAGES_NAVIGATION.find((p) => p.id === activeTab) || PAGES_NAVIGATION[0];
 
   return (
-    <div className={`min-h-screen font-sans antialiased transition-colors duration-200 pb-20 lg:pb-6 ${ui.pageBg}`}>
-      <style>{`
-        @keyframes pulseSubtle {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.55; }
-        }
-        @keyframes slideInUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes laserScan {
-          0%, 100% { transform: translateY(0%); opacity: 0.85; }
-          50% { transform: translateY(100%); opacity: 0.35; }
-        }
-        .animate-slide-up {
-          animation: slideInUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .pulse-dot {
-          animation: pulseSubtle 2s infinite ease-in-out;
-        }
-        .laser-line {
-          animation: laserScan 2.2s infinite ease-in-out;
-        }
-        .tabular-nums {
-          font-variant-numeric: tabular-nums;
-        }
-      `}</style>
-
+    <div className={`min-h-screen font-sans antialiased transition-colors duration-200 pb-20 lg:pb-8 ${ui.pageBg}`}>
       {/* ====================================================================
-          STICKY TOP COMMAND HEADER (Responsive across Mobile, Tablet, Desktop)
+          APPLE-STYLE TOP NAVIGATION HEADER
       ==================================================================== */}
-      <header className={`sticky top-0 z-30 border-b ${ui.headerBg} backdrop-blur-md bg-opacity-95`}>
-        <div className="max-w-[1600px] mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
+      <header className={`sticky top-0 z-30 border-b ${ui.headerBg} backdrop-blur-xl`}>
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
           {/* Left: Mobile Menu Button + Brand Identity */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden p-2 rounded-lg border ${ui.secondaryBtn}`}
+              className={`lg:hidden p-2 rounded-xl border ${ui.secondaryBtn}`}
               aria-label="Toggle Page Navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
             <div
-              onClick={() => navigateToPage('home')}
-              className="flex items-center gap-2.5 cursor-pointer group"
+              onClick={() => navigateToPage('dispatch')}
+              className="flex items-center gap-2.5 cursor-pointer select-none"
             >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#C84B20] group-hover:bg-[#B03E17] transition-colors flex items-center justify-center text-white font-mono font-bold text-base sm:text-lg shadow-sm border border-[#A33914]">
+              <div className="w-8 h-8 rounded-lg bg-[#0071E3] flex items-center justify-center text-white font-semibold text-sm shadow-xs">
                 SB
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold tracking-tight text-base sm:text-lg">ShelfBridge</span>
-                  <span className="hidden sm:inline-block text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-[#C84B20]/15 text-[#C84B20] border border-[#C84B20]/30 font-semibold">
-                    AMD Act 3 · Commerce Network
-                  </span>
+                <div className={`font-semibold tracking-tight text-sm sm:text-base ${ui.textPrimary} leading-tight`}>
+                  ShelfBridge
                 </div>
-                <p className={`text-[11px] hidden md:block ${ui.mutedText}`}>
-                  Neighbourhood Inventory Coordination & Lost-Sale Recovery Platform
+                <p className={`text-[11px] hidden sm:block ${ui.mutedText}`}>
+                  Inventory Coordination Network
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Right: Store Perspective Switcher + Actions + Theme */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className={`flex items-center p-1 rounded-lg border ${ui.subCardBg} overflow-x-auto max-w-[210px] sm:max-w-none`}>
-              <span className={`text-[10px] font-mono uppercase tracking-wider px-2 py-1 ${ui.mutedText} hidden xl:inline`}>
-                Terminal:
-              </span>
-              {stores.map((st) => {
-                const active = activeStoreId === st.id;
-                const incomingCount = requests.filter(
-                  (r) => r.status === 'awaiting_supplier' && r.offerDetails?.supplierStoreId === st.id
-                ).length;
-
-                return (
-                  <button
-                    key={st.id}
-                    onClick={() => setActiveStoreId(st.id)}
-                    className={`relative px-2 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1 shrink-0 ${
-                      active
-                        ? 'bg-[#C84B20] text-white shadow-sm font-semibold'
-                        : `${ui.mutedText} hover:text-current`
-                    }`}
-                  >
-                    <span className="font-mono text-[11px]">{st.code}</span>
-                    <span className="hidden md:inline">{st.name.split(' ')[0]}</span>
-                    {incomingCount > 0 && (
-                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-400 text-stone-950 font-bold">
-                        {incomingCount}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-              <button
-                onClick={() => setActiveStoreId('network')}
-                className={`px-2 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1 shrink-0 ${
-                  activeStoreId === 'network'
-                    ? 'bg-stone-800 text-white dark:bg-zinc-200 dark:text-zinc-900 font-semibold'
-                    : `${ui.mutedText} hover:text-current`
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Cluster</span>
-              </button>
-            </div>
-
+          {/* Right: Primary Action + Theme Toggle */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => navigateToPage('capture')}
-              className={`px-2.5 sm:px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 ${ui.accentBtn}`}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 ${ui.accentBtn}`}
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Log Stockout</span>
+              <span>Log Stockout</span>
             </button>
 
             <button
-              onClick={() => setTheme(isDark ? 'ledger' : 'terminal')}
-              title="Switch Ledger / Terminal Theme"
-              className={`p-2 rounded-lg border transition-colors shrink-0 ${ui.secondaryBtn}`}
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              title="Toggle Theme"
+              className={`p-2 rounded-xl border transition-colors ${ui.secondaryBtn}`}
             >
-              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-stone-700" />}
-            </button>
-          </div>
-        </div>
-
-        {/* INTERACTIVE 6-STEP JUDGE WALKTHROUGH BAR (Navigates directly across the pages) */}
-        <div className={`border-t ${ui.borderCol} ${isDark ? 'bg-[#161B24]' : 'bg-[#EFECE3]'}`}>
-          <div className="max-w-[1600px] mx-auto px-3 sm:px-6 py-1.5 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 overflow-x-auto py-0.5 no-scrollbar">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-stone-900 text-stone-100 dark:bg-zinc-100 dark:text-zinc-900 shrink-0">
-                3-Min Demo Walkthrough
-              </span>
-              <div className="flex items-center gap-1.5">
-                {DEMO_STEPS.map((s) => {
-                  const isCurrent = demoStep === s.step;
-                  const isDone = demoStep > s.step;
-                  return (
-                    <button
-                      key={s.step}
-                      onClick={() => {
-                        setDemoStep(s.step);
-                        setSelectedRequestId('REQ-1042');
-                        navigateToPage(s.page);
-                        if (s.step === 4) setActiveStoreId('store-b');
-                        else setActiveStoreId('store-a');
-                      }}
-                      className={`px-2.5 py-1 rounded text-xs font-mono transition-all shrink-0 flex items-center gap-1 border ${
-                        isCurrent
-                          ? 'bg-[#C84B20] text-white border-[#C84B20] font-semibold shadow-sm'
-                          : isDone
-                          ? 'bg-emerald-600/15 text-emerald-800 dark:text-emerald-300 border-emerald-600/30'
-                          : `${ui.cardBg} ${ui.mutedText}`
-                      }`}
-                    >
-                      {isDone ? <Check className="w-3 h-3" /> : null}
-                      <span>{s.title}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <button
-              onClick={handleResetDemo}
-              className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1 border shrink-0 ${ui.secondaryBtn}`}
-            >
-              <RotateCcw className="w-3 h-3" /> <span>Reset Scenario</span>
+              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-stone-600" />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* ====================================================================
-          MOBILE NAVIGATION DRAWER (Slide-over for small screens)
-      ==================================================================== */}
+      {/* MOBILE NAVIGATION DRAWER */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden bg-black/60 backdrop-blur-xs flex">
-          <div className={`w-80 max-w-[85vw] h-full border-r p-4 overflow-y-auto flex flex-col justify-between ${ui.sidebarBg}`}>
+        <div className="fixed inset-0 z-40 lg:hidden bg-black/40 backdrop-blur-xs flex">
+          <div className={`w-72 max-w-[80vw] h-full border-r p-4 overflow-y-auto flex flex-col justify-between ${ui.sidebarBg}`}>
             <div>
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-stone-200 dark:border-zinc-800">
-                <span className="font-mono text-xs uppercase font-bold text-[#C84B20]">
-                  ShelfBridge Pages (9)
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+                <span className="text-xs uppercase font-semibold text-[#86868B]">
+                  Navigation
                 </span>
-                <button onClick={() => setMobileMenuOpen(false)} className="p-1 rounded">
+                <button onClick={() => setMobileMenuOpen(false)} className="p-1 rounded-lg">
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {PAGES_NAVIGATION.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
@@ -1452,36 +1338,28 @@ export default function App() {
                     <button
                       key={item.id}
                       onClick={() => navigateToPage(item.id)}
-                      className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 border ${
+                      className={`w-full px-3 py-2.5 rounded-xl text-left transition-all flex items-center gap-3 ${
                         isActive
-                          ? 'bg-[#C84B20] text-white border-[#C84B20] shadow-sm'
-                          : `border-transparent hover:border-stone-300 dark:hover:border-zinc-700`
+                          ? isDark
+                            ? 'bg-white/10 text-white font-semibold'
+                            : 'bg-[#0071E3]/10 text-[#0071E3] font-semibold'
+                          : isDark
+                          ? 'text-zinc-300 hover:text-white hover:bg-white/[0.06]'
+                          : 'text-stone-700 hover:text-stone-950 hover:bg-black/[0.04]'
                       }`}
                     >
-                      <Icon className="w-4 h-4 mt-0.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-1">
-                          <span className="font-bold text-xs truncate">{item.label}</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/15 shrink-0">
-                            {item.badge}
-                          </span>
-                        </div>
-                        <div className={`text-[11px] truncate ${isActive ? 'text-white/85' : ui.mutedText}`}>
-                          {item.desc}
-                        </div>
-                      </div>
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? (isDark ? 'text-white' : 'text-[#0071E3]') : (isDark ? 'text-zinc-400' : 'text-stone-500')}`} />
+                      <span className="text-xs">{item.label}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div className={`p-3 rounded-xl border mt-4 text-xs font-mono ${ui.subCardBg}`}>
-              <div className="font-bold text-[#C84B20]">Active Perspective</div>
-              <div className="mt-0.5">
-                {activeStoreId === 'network'
-                  ? 'Cluster Operator View'
-                  : stores.find((s) => s.id === activeStoreId)?.name}
+            <div className={`p-3 rounded-xl border mt-4 text-xs ${ui.subCardBg}`}>
+              <div className={`text-[11px] ${ui.mutedText}`}>Active Store</div>
+              <div className={`font-semibold mt-0.5 ${ui.textPrimary}`}>
+                Apex Mobile & Tech
               </div>
             </div>
           </div>
@@ -1493,7 +1371,7 @@ export default function App() {
       {toast && (
         <div className="fixed bottom-16 lg:bottom-5 right-4 z-50 max-w-md animate-slide-up">
           <div
-            className={`p-4 rounded-xl shadow-xl border flex items-start gap-3 ${
+            className={`p-4 rounded-2xl shadow-lg border flex items-start gap-3 ${
               toast.tone === 'error'
                 ? 'bg-rose-950 text-rose-100 border-rose-700'
                 : toast.tone === 'success'
@@ -1509,7 +1387,7 @@ export default function App() {
               <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
             )}
             <div className="flex-1 text-xs">
-              <div className="font-bold text-sm mb-0.5">{toast.title}</div>
+              <div className="font-semibold text-sm mb-0.5">{toast.title}</div>
               <div className="opacity-90 leading-relaxed">{toast.detail}</div>
             </div>
             <button onClick={() => setToast(null)} className="opacity-70 hover:opacity-100">
@@ -1520,16 +1398,15 @@ export default function App() {
       )}
 
       {/* ====================================================================
-          MAIN MULTI-PAGE LAYOUT: LEFT SIDEBAR NAV + RIGHT PAGE VIEWPORT
+          MAIN LAYOUT: LEFT SIDEBAR NAV + RIGHT PAGE VIEWPORT
       ==================================================================== */}
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* DESKTOP SIDEBAR NAVIGATION (9 Dedicated Pages) */}
-        <aside className={`hidden lg:block lg:col-span-3 xl:col-span-2.5 sticky top-28 rounded-2xl border p-3 ${ui.sidebarBg}`}>
-          <div className="px-2 py-1.5 mb-2 flex items-center justify-between border-b border-stone-200 dark:border-zinc-800">
-            <span className="font-mono text-[11px] uppercase tracking-wider font-bold text-[#C84B20]">
-              Platform Pages (9)
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* DESKTOP SIDEBAR NAVIGATION */}
+        <aside className={`hidden lg:block lg:col-span-3 xl:col-span-2.5 sticky top-20 rounded-2xl border p-2.5 ${ui.sidebarBg}`}>
+          <div className="px-3 py-2 mb-1 flex items-center justify-between border-b border-black/[0.04] dark:border-white/[0.06]">
+            <span className="text-[11px] font-semibold text-[#86868B] uppercase tracking-wider">
+              Navigation
             </span>
-            <span className={`text-[10px] font-mono ${ui.mutedText}`}>JSX Router</span>
           </div>
 
           <nav className="space-y-1">
@@ -1540,90 +1417,71 @@ export default function App() {
                 <button
                   key={item.id}
                   onClick={() => navigateToPage(item.id)}
-                  className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-2.5 border ${
+                  className={`w-full px-3 py-2.5 rounded-xl text-left transition-all flex items-center gap-3 ${
                     isActive
-                      ? 'bg-[#C84B20] text-white border-[#C84B20] shadow-sm'
-                      : `border-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.03]`
+                      ? isDark
+                        ? 'bg-white/10 text-white font-semibold'
+                        : 'bg-[#0071E3]/10 text-[#0071E3] font-semibold'
+                      : isDark
+                      ? 'text-zinc-300 hover:text-white hover:bg-white/[0.06]'
+                      : 'text-stone-700 hover:text-stone-950 hover:bg-black/[0.04]'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${isActive ? 'text-white' : 'text-[#C84B20]'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? (isDark ? 'text-white' : 'text-[#0071E3]') : (isDark ? 'text-zinc-400' : 'text-stone-500')}`} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="font-bold text-xs truncate">{item.label}</span>
-                      <span
-                        className={`text-[9px] font-mono px-1.5 py-0.2 rounded shrink-0 ${
-                          isActive ? 'bg-black/20 text-white' : ui.subCardBg
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    </div>
-                    <div className={`text-[11px] truncate mt-0.5 ${isActive ? 'text-white/85' : ui.mutedText}`}>
-                      {item.desc}
-                    </div>
+                    <span className="text-xs">{item.label}</span>
                   </div>
                 </button>
               );
             })}
           </nav>
 
-          {/* Live Cluster Health Footer inside Sidebar */}
-          <div className={`mt-4 p-3 rounded-xl border text-xs font-mono space-y-2 ${ui.subCardBg}`}>
+          {/* Health Summary Footer inside Sidebar */}
+          <div className={`mt-4 p-3.5 rounded-xl border text-xs space-y-2 ${ui.subCardBg}`}>
             <div className="flex items-center justify-between">
               <span className={ui.mutedText}>Recovered Sales:</span>
-              <span className="font-bold text-emerald-700 dark:text-emerald-400">
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                 ₹{metrics.totalRecoveredRevenue.toLocaleString('en-IN')}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className={ui.mutedText}>Net Retailer Contrib:</span>
-              <span className="font-bold text-[#C84B20]">
+              <span className={ui.mutedText}>Net Margin:</span>
+              <span className="font-semibold text-[#0071E3]">
                 +₹{metrics.totalRetailerContribution.toLocaleString('en-IN')}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className={ui.mutedText}>Active Atomic Holds:</span>
-              <span className="font-bold text-indigo-600 dark:text-indigo-400">
+              <span className={ui.mutedText}>Active Holds:</span>
+              <span className="font-semibold text-indigo-600 dark:text-indigo-400">
                 {metrics.reservedCount} locked
               </span>
             </div>
           </div>
         </aside>
 
-        {/* ACTIVE PAGE VIEWPORT (9 Cols on Desktop, Full Width on Mobile/Tablet) */}
+        {/* ACTIVE PAGE VIEWPORT */}
         <section className="lg:col-span-9 xl:col-span-9.5 space-y-5 min-w-0">
-          {/* Page Breadcrumb & Quick KPI Strip */}
+          {/* Page Header & Quick Metric Strip */}
           <div className={`p-4 rounded-2xl border ${ui.cardBg} flex flex-wrap items-center justify-between gap-3`}>
-            <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-lg bg-[#C84B20]/15 text-[#C84B20] font-mono text-xs font-bold">
-                {currentPageMeta.badge}
-              </span>
-              <div>
-                <h1 className="text-base sm:text-lg font-bold tracking-tight">
-                  {currentPageMeta.label}
-                </h1>
-                <p className={`text-xs ${ui.mutedText}`}>{currentPageMeta.desc}</p>
-              </div>
+            <div>
+              <h1 className="text-base sm:text-lg font-semibold tracking-tight">
+                {currentPageMeta.label}
+              </h1>
+              <p className={`text-xs mt-0.5 ${ui.mutedText}`}>{currentPageMeta.desc}</p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-              <div className={`px-3 py-1.5 rounded-lg border ${ui.subCardBg}`}>
-                Recovered: <strong className="text-emerald-700 dark:text-emerald-400">₹{metrics.totalRecoveredRevenue.toLocaleString('en-IN')}</strong>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <div className={`px-3 py-1.5 rounded-full border ${ui.subCardBg}`}>
+                Recovered: <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">₹{metrics.totalRecoveredRevenue.toLocaleString('en-IN')}</strong>
               </div>
-              <div className={`px-3 py-1.5 rounded-lg border ${ui.subCardBg}`}>
-                Contrib: <strong className="text-[#C84B20]">+₹{metrics.totalRetailerContribution.toLocaleString('en-IN')}</strong>
+              <div className={`px-3 py-1.5 rounded-full border ${ui.subCardBg}`}>
+                Contrib: <strong className="text-[#0071E3] font-semibold">+₹{metrics.totalRetailerContribution.toLocaleString('en-IN')}</strong>
               </div>
-              <button
-                onClick={() => setShowNewRequestModal(true)}
-                className={`px-3 py-1.5 rounded-lg font-bold ${ui.accentBtn}`}
-              >
-                + Quick Modal Capture
-              </button>
             </div>
           </div>
 
           {/* ================================================================
-              PAGE 1: OVERVIEW & HACKATHON PITCH PAGE ('home')
+              PAGE 1: OVERVIEW PAGE ('home')
           ================================================================ */}
           {activeTab === 'home' && (
             <div className="space-y-6 animate-slide-up">
@@ -2110,23 +1968,16 @@ export default function App() {
                             <div className="flex flex-wrap items-center gap-2">
                               <button
                                 onClick={() => handleCompleteFulfilment(selectedRequest.id)}
-                                className="px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5 shadow-xs"
                               >
                                 <CheckCircle2 className="w-4 h-4" />
                                 Record Handover & Complete Sale
                               </button>
                               <button
-                                onClick={handleSimulateRaceCondition}
-                                className={`px-3 py-2.5 rounded-lg text-xs font-mono flex items-center gap-1 ${ui.secondaryBtn}`}
-                              >
-                                <ShieldCheck className="w-4 h-4 text-indigo-500" />
-                                Test Conflict Lock
-                              </button>
-                              <button
                                 onClick={() => handleCancelReservation(selectedRequest.id)}
-                                className="px-3 py-2.5 rounded-lg text-xs font-mono bg-rose-600/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 hover:bg-rose-600/25"
+                                className="px-3.5 py-2 rounded-xl text-xs font-medium bg-rose-600/10 text-rose-700 dark:text-rose-300 border border-rose-500/20 hover:bg-rose-600/20"
                               >
-                                Cancel & Release Stock
+                                Cancel Hold & Release Stock
                               </button>
                             </div>
                           </div>
@@ -2136,59 +1987,46 @@ export default function App() {
                       {selectedRequest.status === 'fulfilled' && selectedRequest.offerDetails && (
                         <div className="flex flex-wrap items-center justify-between gap-4">
                           <div>
-                            <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block">
-                              Transaction Completed & Audited ({selectedRequest.reservationDetails?.completedAt})
+                            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300 block">
+                              Transaction Completed ({selectedRequest.reservationDetails?.completedAt})
                             </span>
-                            <h3 className="text-base font-bold mt-0.5">
+                            <h3 className="text-base font-semibold mt-0.5">
                               Lost sale recovered via{' '}
                               {stores.find((s) => s.id === selectedRequest.offerDetails.supplierStoreId)?.name}!
                             </h3>
-                            <p className={`text-xs font-mono mt-1 ${ui.mutedText}`}>
+                            <p className={`text-xs mt-1 ${ui.mutedText}`}>
                               Sale: ₹{selectedRequest.customerSalePrice} − Transfer: ₹
                               {selectedRequest.offerDetails.transferPrice} − Runner: ₹{selectedRequest.deliveryCost} −
-                              ShelfBridge Fee: ₹{selectedRequest.platformFee} ={' '}
-                              <strong className="text-emerald-700 dark:text-emerald-300">
+                              Platform Fee: ₹{selectedRequest.platformFee} ={' '}
+                              <strong className="text-emerald-700 dark:text-emerald-300 font-semibold">
                                 +₹
                                 {selectedRequest.customerSalePrice -
                                   selectedRequest.offerDetails.transferPrice -
                                   selectedRequest.deliveryCost -
                                   selectedRequest.platformFee}{' '}
-                                Incremental Retailer Contribution
+                                Incremental Contribution
                               </strong>
                             </p>
                           </div>
-                          <button
-                            onClick={() => navigateToPage('economics')}
-                            className={`px-3.5 py-2 rounded-lg text-xs font-mono font-semibold flex items-center gap-1.5 ${ui.secondaryBtn}`}
-                          >
-                            <span>Inspect Full Unit Economics</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
                         </div>
                       )}
                     </div>
                   )}
 
                   {/* Candidate List */}
-                  <div className={`rounded-xl border ${ui.cardBg} overflow-hidden`}>
+                  <div className={`rounded-2xl border ${ui.cardBg} overflow-hidden`}>
                     <div className={`px-5 py-4 border-b ${ui.borderCol} flex flex-wrap items-center justify-between gap-2`}>
                       <div>
-                        <h3 className="font-bold text-base flex items-center gap-2">
-                          <span>Nearby Stock Candidates & Compatibility Safeguards</span>
-                          <span className="text-xs font-mono px-2 py-0.5 rounded bg-stone-200 dark:bg-zinc-800">
-                            {candidatesForSelectedRequest.length} evaluated
+                        <h3 className="font-semibold text-base flex items-center gap-2">
+                          <span>Nearby Store Candidates & Spec Verification</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-stone-100 dark:bg-zinc-800 text-stone-600 dark:text-zinc-300">
+                            {candidatesForSelectedRequest.length} found
                           </span>
                         </h3>
-                        <p className={`text-xs ${ui.mutedText}`}>
-                          Exact matches first → Verified substitutes second → Incompatible lookalikes blocked
+                        <p className={`text-xs mt-0.5 ${ui.mutedText}`}>
+                          Exact matches first → Verified substitutes second → Incompatible blocked
                         </p>
                       </div>
-                      <button
-                        onClick={() => navigateToPage('matching')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-mono flex items-center gap-1 ${ui.secondaryBtn}`}
-                      >
-                        <Eye className="w-3.5 h-3.5" /> Open Full 4-Stage Inspector
-                      </button>
                     </div>
 
                     <div className="divide-y divide-stone-200 dark:divide-zinc-800">
@@ -2285,34 +2123,31 @@ export default function App() {
                                 </div>
 
                                 {isIncomp ? (
-                                  <button
-                                    onClick={() => handlePingSupplier(cand)}
-                                    className="w-full py-2 px-3 rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 font-mono text-xs font-bold flex items-center justify-center gap-1.5"
-                                  >
-                                    <XCircle className="w-4 h-4" />
-                                    Safeguard Blocked ({cand.product.attributes.wattage}W &lt; {selectedRequest.requiredSpecs.minWattage}W)
-                                  </button>
+                                  <div className="w-full py-2 px-3 rounded-xl bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 border border-rose-200/50 text-xs font-medium flex items-center justify-center gap-1.5">
+                                    <XCircle className="w-4 h-4 text-rose-500" />
+                                    <span>Incompatible Spec ({cand.product.attributes.wattage}W &lt; {selectedRequest.requiredSpecs.minWattage}W)</span>
+                                  </div>
                                 ) : selectedRequest.status === 'matched' || selectedRequest.status === 'open' ? (
                                   <button
                                     onClick={() => handlePingSupplier(cand)}
                                     disabled={!cand.canReserve}
-                                    className={`w-full py-2 px-3 rounded-lg font-mono text-xs font-bold flex items-center justify-center gap-1.5 ${
+                                    className={`w-full py-2.5 px-3 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 ${
                                       cand.canReserve
                                         ? ui.accentBtn
-                                        : 'bg-stone-300 dark:bg-zinc-800 text-stone-500 cursor-not-allowed'
+                                        : 'bg-stone-200 dark:bg-zinc-800 text-stone-400 cursor-not-allowed'
                                     }`}
                                   >
                                     <span>
-                                      {isSub ? 'Confirm Substitute w/ Shop' : '1-Click Ping Supplier Stock'}
+                                      {isSub ? 'Select Substitute' : 'Request Transfer'}
                                     </span>
                                     <ArrowRight className="w-3.5 h-3.5" />
                                   </button>
                                 ) : (
                                   <button
                                     onClick={() => handlePingSupplier(cand)}
-                                    className={`w-full py-1.5 px-3 rounded-lg font-mono text-xs ${ui.secondaryBtn}`}
+                                    className={`w-full py-2 px-3 rounded-xl text-xs font-medium ${ui.secondaryBtn}`}
                                   >
-                                    Switch Counterparty
+                                    Switch Store
                                   </button>
                                 )}
                               </div>
@@ -2515,28 +2350,27 @@ export default function App() {
                 <div className={`p-6 rounded-2xl border ${ui.cardBg} space-y-4`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-[#C84B20] font-bold">
-                        P1 Feature · GTIN / Barcode Scanner
+                      <span className="text-xs uppercase tracking-wider text-[#86868B] font-semibold">
+                        Instant Lookup
                       </span>
-                      <h3 className="text-base font-bold mt-0.5">
-                        Optical Box / Barcode Scanner Simulator
+                      <h3 className="text-base font-semibold mt-0.5">
+                        Barcode & Box Scanner
                       </h3>
                     </div>
-                    <Barcode className="w-5 h-5 text-[#C84B20]" />
+                    <Barcode className="w-5 h-5 text-[#0071E3]" />
                   </div>
 
-                  {/* Simulated Viewfinder */}
-                  <div className="relative h-36 rounded-xl bg-stone-950 border border-stone-800 flex flex-col items-center justify-center overflow-hidden p-4 text-stone-200 font-mono">
-                    <div className="w-full h-0.5 bg-[#C84B20] shadow-[0_0_12px_#C84B20] absolute top-6 laser-line" />
-                    <Barcode className="w-12 h-12 text-stone-400 mb-2" />
-                    <div className="text-xs font-bold tracking-widest">{scannedBarcode}</div>
-                    <div className="text-[10px] text-emerald-400 mt-1">
-                      GTIN-12 / EAN-13 Deterministic Lookup Active
+                  {/* Clean Scanner Box */}
+                  <div className="relative h-28 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] flex flex-col items-center justify-center p-4">
+                    <Barcode className="w-10 h-10 text-stone-500 mb-1" />
+                    <div className={`text-xs font-semibold tracking-wider ${ui.textPrimary}`}>{scannedBarcode}</div>
+                    <div className="text-[11px] text-[#0071E3] mt-0.5">
+                      Ready to Scan Box or Enter GTIN
                     </div>
                   </div>
 
                   <p className={`text-xs ${ui.mutedText}`}>
-                    Click any product box barcode below to simulate scanning an empty shelf label or customer's old adapter box:
+                    Select any catalogue product below to test instant barcode fill:
                   </p>
 
                   <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
@@ -2547,18 +2381,18 @@ export default function App() {
                         onClick={() => handleScanBarcodePreset(prod)}
                         className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                           scannedBarcode === prod.barcode
-                            ? 'border-[#C84B20] bg-[#C84B20]/10'
-                            : `${ui.subCardBg} hover:border-[#C84B20]/50`
+                            ? 'border-[#0071E3] bg-[#0071E3]/5'
+                            : `${ui.subCardBg} hover:border-[#0071E3]/40`
                         }`}
                       >
                         <div>
-                          <div className="font-mono text-xs font-bold text-[#C84B20]">
-                            GTIN: {prod.barcode} · {prod.sku}
+                          <div className="text-xs font-medium text-[#0071E3]">
+                            {prod.barcode} · {prod.sku}
                           </div>
-                          <div className="text-xs font-semibold mt-0.5">{prod.name}</div>
+                          <div className="text-xs font-medium mt-0.5">{prod.name}</div>
                         </div>
-                        <span className="text-[11px] font-mono px-2 py-1 rounded bg-black/10 dark:bg-white/10 shrink-0">
-                          Scan Box
+                        <span className="text-[11px] px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 shrink-0 font-medium">
+                          Select
                         </span>
                       </button>
                     ))}
@@ -2834,33 +2668,33 @@ export default function App() {
                 {/* Right 4 Cols: Concurrency & Double-Booking Simulator */}
                 <div className={`lg:col-span-4 p-5 rounded-2xl border ${ui.cardBg} space-y-4`}>
                   <div>
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-[#C84B20] font-bold">
-                      Section 7.5 · Concurrency Control
+                    <span className="text-xs uppercase tracking-wider text-[#86868B] font-semibold">
+                      Reliability & Protection
                     </span>
-                    <h3 className="text-base font-bold mt-0.5">
-                      Row-Level Lock Stress Tester
+                    <h3 className="text-base font-semibold mt-0.5">
+                      Atomic Hold Guarantees
                     </h3>
                   </div>
-                 <p>
-  A reservation only succeeds if
-  <code>on_hand_quantity - active_reserved_quantity &gt;= requested_quantity</code>
-  inside an atomic database transaction (<code>SELECT ... FOR UPDATE</code>).
-</p>
-                  <div className={`p-3.5 rounded-xl border font-mono text-xs space-y-2 ${ui.subCardBg}`}>
-                    <div className="text-[#C84B20] font-bold">BEGIN TRANSACTION;</div>
-                    <div>SELECT on_hand, reserved FROM inventory_items</div>
-                    <div>WHERE store_id = 'store-b' AND product_id = 'prod-1'</div>
-                    <div className="text-emerald-600 font-bold">FOR UPDATE;</div>
-                    <div>-- Checks available &gt;= 1 before commit</div>
-                    <div className="text-[#C84B20] font-bold">COMMIT;</div>
+                  <div className={`p-4 rounded-2xl border text-xs space-y-3 ${ui.subCardBg}`}>
+                    <div className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <strong>15-Minute Expiry:</strong> Holds automatically release if unfulfilled, restoring item to store stock.
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Zero Double-Booking:</strong> Available inventory is locked atomically at the moment of reservation.
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <div>
+                        <strong>Handover PIN:</strong> Counter staff enter the 4-digit PIN upon runner pickup to settle payment.
+                      </div>
+                    </div>
                   </div>
-                  <button
-                    onClick={handleSimulateRaceCondition}
-                    className={`w-full py-2.5 px-4 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 ${ui.accentBtn}`}
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Simulate Competing Buyer Race Condition</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -3558,8 +3392,8 @@ export default function App() {
             <button
               key={nav.id}
               onClick={() => navigateToPage(nav.id)}
-              className={`py-1.5 rounded-lg flex flex-col items-center justify-center text-[10px] font-mono ${
-                active ? 'text-[#C84B20] font-bold' : ui.mutedText
+              className={`py-1.5 rounded-xl flex flex-col items-center justify-center text-[10px] ${
+                active ? 'text-[#0071E3] font-semibold' : ui.mutedText
               }`}
             >
               <Icon className="w-4 h-4 mb-0.5" />
@@ -3571,16 +3405,14 @@ export default function App() {
 
       {/* MODAL 1: FAST UNMET-DEMAND REQUEST CAPTURE */}
       {showNewRequestModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden animate-slide-up ${ui.cardBg}`}>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className={`w-full max-w-xl rounded-2xl border shadow-xl overflow-hidden animate-slide-up ${ui.cardBg}`}>
             <div className={`px-6 py-4 border-b ${ui.borderCol} flex items-center justify-between`}>
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-[#C84B20] font-bold">
-                  Surface A · Fast Unmet-Demand Capture
-                </span>
-                <h3 className="text-lg font-bold">Log Out-of-Stock Customer Request</h3>
+                <h3 className="text-base font-semibold">Log Customer Stockout</h3>
+                <p className={`text-xs ${ui.mutedText}`}>Create a new unmet demand request across the network</p>
               </div>
-              <button onClick={() => setShowNewRequestModal(false)} className="p-1 rounded-lg hover:bg-black/10">
+              <button onClick={() => setShowNewRequestModal(false)} className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
                 <X className="w-5 h-5" />
               </button>
             </div>

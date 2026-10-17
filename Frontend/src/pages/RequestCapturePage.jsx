@@ -145,7 +145,7 @@ export default function RequestCapturePage(props) {
                     />
                     {isParsingAI && (
                       <div className="text-xs font-mono text-[#C84B20] mt-1.5 flex items-center gap-1.5">
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> AMD ROCm Local LLM extracting structured electrical specs...
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> AMD Ryzen AVX2 / DirectML extracting structured electrical specs...
                       </div>
                     )}
                   </div>

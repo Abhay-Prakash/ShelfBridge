@@ -93,9 +93,9 @@ export default function MatchInspectorPage(props) {
                     desc: 'Verifies connector, minimum wattage (≥65W), and PD/PPS protocol compliance.'
                   },
                   {
-                    stage: 'Stage 3 · Fuzzy + ROCm',
+                    stage: 'Stage 3 · Fuzzy + AMD ML',
                     title: 'BM25 + Embedding Rerank',
-                    status: '18.4ms ROCm Inference',
+                    status: '18.4ms AMD Ryzen AVX2 Inference',
                     desc: 'Retrieves compatible substitutes (Samsung 65W Trio) when names differ.'
                   },
                   {

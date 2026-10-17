@@ -3701,18 +3701,31 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10">
-                <div className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-300">
-                  AMD DirectML
+              <div className={`p-3.5 rounded-xl border ${
+                amdBenchmarkResult.runs?.directml_acceleration?.status === 'HARDWARE_GPU_EXECUTION'
+                  ? 'border-emerald-500/40 bg-emerald-500/10'
+                  : 'border-amber-500/40 bg-amber-500/10'
+              }`}>
+                <div className={`text-[10px] uppercase font-bold ${
+                  amdBenchmarkResult.runs?.directml_acceleration?.status === 'HARDWARE_GPU_EXECUTION'
+                    ? 'text-emerald-700 dark:text-emerald-300'
+                    : 'text-amber-700 dark:text-amber-400'
+                }`}>
+                  AMD DirectML Probe
                 </div>
-                <div className="text-sm font-bold text-emerald-700 dark:text-emerald-300 mt-1">
-                  {amdBenchmarkResult.runs?.directml_acceleration?.latency_ms_per_batch} ms
+                <div className="text-xs font-bold mt-1">
+                  {amdBenchmarkResult.runs?.directml_acceleration?.status === 'HARDWARE_GPU_EXECUTION'
+                    ? `${amdBenchmarkResult.runs?.directml_acceleration?.latency_ms_per_batch} ms`
+                    : 'CPU Fallback Active'}
                 </div>
-                <div className="text-[11px] text-emerald-700/80 dark:text-emerald-400 mt-0.5">
-                  {(amdBenchmarkResult.runs?.directml_acceleration?.throughput_samples_per_sec / 1e6).toFixed(2)}M samples/s
-                </div>
-                <div className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 mt-1">
-                  {amdBenchmarkResult.runs?.directml_acceleration?.speedup_vs_baseline} speedup ⚡
+                <div className={`text-[10px] mt-1 leading-snug ${
+                  amdBenchmarkResult.runs?.directml_acceleration?.status === 'HARDWARE_GPU_EXECUTION'
+                    ? 'text-emerald-700 dark:text-emerald-300 font-bold'
+                    : 'text-amber-700 dark:text-amber-400'
+                }`}>
+                  {amdBenchmarkResult.runs?.directml_acceleration?.status === 'HARDWARE_GPU_EXECUTION'
+                    ? `${amdBenchmarkResult.runs?.directml_acceleration?.speedup_vs_baseline} speedup ⚡`
+                    : 'No D3D12 GPU filter match; transparently executed via CPU AVX2'}
                 </div>
               </div>
             </div>

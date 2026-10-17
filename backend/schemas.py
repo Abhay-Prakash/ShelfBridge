@@ -115,8 +115,9 @@ class SupplierOfferOut(BaseModel):
 
 
 class ReservationCreate(BaseModel):
-    offer_id: str
+    offer_id: Optional[str] = None
     pickup_window_minutes: int = Field(default=20, ge=5, le=120)
+
 
 
 class ReservationOut(BaseModel):
@@ -128,9 +129,11 @@ class ReservationOut(BaseModel):
     reserved_at: datetime.datetime
     expires_at: datetime.datetime
     status: str
+    fulfilment: Optional["FulfilmentOut"] = None
 
     class Config:
         from_attributes = True
+
 
 
 class FulfilmentHandover(BaseModel):
@@ -208,3 +211,7 @@ class FinancialSummaryOut(BaseModel):
     total_platform_net_revenue: float
     recovery_rate_pct: float
     average_fulfilment_seconds: float
+
+
+ReservationOut.model_rebuild()
+UnmetDemandOut.model_rebuild()

@@ -141,28 +141,43 @@ def run_amd_hardware_benchmark(batch_size: int = 128, iterations: int = 50) -> D
         "speedup_vs_baseline": f"{speedup_cpu}x"
     }
 
-    # 3. DirectML Provider (if available)
+    # 3. DirectML Provider (probe device availability & actual provider assignment)
     if 'DmlExecutionProvider' in available_providers:
         try:
             sess_dml = ort.InferenceSession(model_path, providers=['DmlExecutionProvider'])
-            for _ in range(5):
-                sess_dml.run(None, {'input_features': dummy_input})
-            start_t = time.perf_counter()
-            for _ in range(iterations):
-                sess_dml.run(None, {'input_features': dummy_input})
-            dml_time = time.perf_counter() - start_t
-            speedup_dml = round(baseline_time / max(dml_time, 1e-6), 2)
-            results["runs"]["directml_acceleration"] = {
-                "execution_time_seconds": round(dml_time, 4),
-                "latency_ms_per_batch": round((dml_time / iterations) * 1000, 3),
-                "throughput_samples_per_sec": round((batch_size * iterations) / dml_time, 1),
-                "speedup_vs_baseline": f"{speedup_dml}x",
-                "status": "SUCCESS"
-            }
+            active_providers = sess_dml.get_providers()
+            is_dml_active = 'DmlExecutionProvider' in active_providers
+
+            if is_dml_active:
+                for _ in range(5):
+                    sess_dml.run(None, {'input_features': dummy_input})
+                start_t = time.perf_counter()
+                for _ in range(iterations):
+                    sess_dml.run(None, {'input_features': dummy_input})
+                dml_time = time.perf_counter() - start_t
+                speedup_dml = round(baseline_time / max(dml_time, 1e-6), 2)
+                results["runs"]["directml_acceleration"] = {
+                    "execution_time_seconds": round(dml_time, 4),
+                    "latency_ms_per_batch": round((dml_time / iterations) * 1000, 3),
+                    "throughput_samples_per_sec": round((batch_size * iterations) / dml_time, 1),
+                    "speedup_vs_baseline": f"{speedup_dml}x",
+                    "status": "HARDWARE_GPU_EXECUTION",
+                    "active_providers": active_providers,
+                    "device": "AMD Radeon Graphics (DirectML D3D12)"
+                }
+            else:
+                # DirectML provider was requested but fell back to CPUExecutionProvider
+                results["runs"]["directml_acceleration"] = {
+                    "status": "FALLBACK_TO_CPU",
+                    "reason": "DirectML device filter found no supported D3D12 GPU device; runtime transparently fell back to CPUExecutionProvider.",
+                    "active_providers": active_providers,
+                    "speedup_vs_baseline": "N/A (CPU fallback)"
+                }
         except Exception as e:
             results["runs"]["directml_acceleration"] = {
-                "status": "FALLBACK_TO_CPU",
+                "status": "UNAVAILABLE",
                 "error": str(e)
             }
 
     return results
+

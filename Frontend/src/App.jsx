@@ -478,7 +478,7 @@ export default function App() {
   const [demoStep, setDemoStep] = useState(1);
 
   const [auditLog, setAuditLog] = useState([
-    { id: 'evt-4', time: '18:52:14', actor: 'MatchingService (AMD AVX2)', action: 'Ranked 3 neighbourhood candidates for REQ-1042 (1 Exact, 1 Compatible Substitute, 1 Flagged Incompatible)', type: 'match' },
+    { id: 'evt-4', time: '18:52:14', actor: 'MatchingService (Deterministic Rules)', action: 'Ranked 3 neighbourhood candidates for REQ-1042 (1 Exact, 1 Compatible Substitute, 1 Flagged Incompatible)', type: 'match' },
 
     { id: 'evt-3', time: '18:52:10', actor: 'Shop A (Rajesh V.)', action: 'Created unmet-demand request REQ-1042 for ANK-A2663-65W (65W USB-C Charger)', type: 'request' },
     { id: 'evt-2', time: '18:45:10', actor: 'ReservationService', action: 'Atomic lock RES-882 acquired on 1 unit of POR-PB20K-65W at Shop B (15m hold)', type: 'reserve' },
@@ -2289,7 +2289,7 @@ export default function App() {
                     />
                     {isParsingAI && (
                       <div className="text-xs font-mono text-[#C84B20] mt-1.5 flex items-center gap-1.5">
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> AMD Ryzen AVX2 / DirectML extracting structured electrical specs...
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Deterministic rule engine extracting structured electrical specs...
                       </div>
                     )}
                   </div>
@@ -2477,10 +2477,10 @@ export default function App() {
                     desc: 'Verifies connector, minimum wattage (≥65W), and PD/PPS protocol compliance.'
                   },
                   {
-                    stage: 'Stage 3 · Fuzzy + AMD ML',
-                    title: 'BM25 + Embedding Rerank',
-                    status: '18.4ms AMD Ryzen AVX2 Inference',
-                    desc: 'Retrieves compatible substitutes (Samsung 65W Trio) when names differ.'
+                    stage: 'Stage 3 · Lexical & Spec Ranking',
+                    title: 'BM25 Token + Specification Ranker',
+                    status: 'Deterministic scoring & substitute discovery',
+                    desc: 'Retrieves compatible substitutes (Samsung 65W Trio) when queries and product titles differ.'
                   },
                   {
                     stage: 'Stage 4 · Explainability',
@@ -3689,15 +3689,15 @@ export default function App() {
               </div>
 
               <div className={`p-3.5 rounded-xl border ${ui.subCardBg}`}>
-                <div className={`text-[10px] uppercase font-bold text-indigo-500`}>12T AVX2 Multi-Thread</div>
+                <div className={`text-[10px] uppercase font-bold text-indigo-500`}>12-Thread CPU Execution</div>
                 <div className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-1">
-                  {amdBenchmarkResult.runs?.amd_ryzen_multicore_avx2?.latency_ms_per_batch} ms
+                  {(amdBenchmarkResult.runs?.amd_ryzen_multithread_cpu || amdBenchmarkResult.runs?.amd_ryzen_multicore_avx2)?.latency_ms_per_batch} ms
                 </div>
                 <div className={`text-[11px] mt-0.5 ${ui.mutedText}`}>
-                  {(amdBenchmarkResult.runs?.amd_ryzen_multicore_avx2?.throughput_samples_per_sec / 1e6).toFixed(2)}M samples/s
+                  {(((amdBenchmarkResult.runs?.amd_ryzen_multithread_cpu || amdBenchmarkResult.runs?.amd_ryzen_multicore_avx2)?.throughput_samples_per_sec || 0) / 1e6).toFixed(2)}M samples/s
                 </div>
                 <div className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-1">
-                  {amdBenchmarkResult.runs?.amd_ryzen_multicore_avx2?.speedup_vs_baseline} speedup
+                  {(amdBenchmarkResult.runs?.amd_ryzen_multithread_cpu || amdBenchmarkResult.runs?.amd_ryzen_multicore_avx2)?.speedup_vs_baseline} speedup
                 </div>
               </div>
 
@@ -3725,7 +3725,7 @@ export default function App() {
                 }`}>
                   {amdBenchmarkResult.runs?.directml_acceleration?.status === 'HARDWARE_GPU_EXECUTION'
                     ? `${amdBenchmarkResult.runs?.directml_acceleration?.speedup_vs_baseline} speedup ⚡`
-                    : 'No D3D12 GPU filter match; transparently executed via CPU AVX2'}
+                    : 'No D3D12 GPU filter match; transparently executed via CPU'}
                 </div>
               </div>
             </div>

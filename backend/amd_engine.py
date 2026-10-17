@@ -1,8 +1,9 @@
 """
-ShelfBridge AMD Compute & Acceleration Benchmark Engine.
-Measures execution time, throughput, and speedup for semantic similarity reranking
-across AMD Ryzen 5 5600H multi-threaded Zen 3 AVX2 and DirectML runtime.
-No mock numbers: runs real ONNX model matrix operations and reports measured execution times.
+ShelfBridge AMD CPU Benchmark Engine.
+Measures execution time and multi-thread scaling on the AMD Ryzen 5 5600H CPU
+using a synthetic dense projection benchmark graph.
+Note: ShelfBridge's core product discovery and compatibility decisions use deterministic
+spec matching rules (matcher.py), not this synthetic benchmark graph.
 """
 
 import os
@@ -119,7 +120,7 @@ def run_amd_hardware_benchmark(batch_size: int = 128, iterations: int = 50) -> D
         "throughput_samples_per_sec": round((batch_size * iterations) / baseline_time, 1)
     }
 
-    # 2. AMD Ryzen 5 5600H Multi-Core AVX2
+    # 2. AMD Ryzen 5 5600H Multi-Threaded CPU Execution (12 Threads)
     opts_multi = ort.SessionOptions()
     opts_multi.intra_op_num_threads = 12
     opts_multi.inter_op_num_threads = 6
@@ -134,11 +135,13 @@ def run_amd_hardware_benchmark(batch_size: int = 128, iterations: int = 50) -> D
         sess_multi.run(None, {'input_features': dummy_input})
     multi_time = time.perf_counter() - start_t
     speedup_cpu = round(baseline_time / max(multi_time, 1e-6), 2)
-    results["runs"]["amd_ryzen_multicore_avx2"] = {
+    results["runs"]["amd_ryzen_multithread_cpu"] = {
         "execution_time_seconds": round(multi_time, 4),
         "latency_ms_per_batch": round((multi_time / iterations) * 1000, 3),
         "throughput_samples_per_sec": round((batch_size * iterations) / multi_time, 1),
-        "speedup_vs_baseline": f"{speedup_cpu}x"
+        "speedup_vs_baseline": f"{speedup_cpu}x",
+        "threads": 12,
+        "note": "Multi-threaded CPU scaling on 6-core/12-thread Zen 3 processor"
     }
 
     # 3. DirectML Provider (probe device availability & actual provider assignment)

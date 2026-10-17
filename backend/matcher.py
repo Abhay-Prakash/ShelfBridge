@@ -155,11 +155,11 @@ def evaluate_product_match(
         prod_port = prod_attrs.get("port_type", "")
         prod_standards = [s.upper() for s in prod_attrs.get("standards", [])]
 
-        # Wattage verification
+        # Wattage verification: Distinguish performance deficit from technical/electrical incompatibility
         if req_wattage:
             if prod_wattage < req_wattage:
                 incompatible_reasons.append(
-                    f"Insufficient wattage: {prod_wattage}W output cannot support {req_wattage}W required device charging"
+                    f"Wattage deficit: {prod_wattage}W output does not meet the customer's {req_wattage}W performance target (insufficient charging rate, though electrically safe under USB-PD negotiation)"
                 )
             elif prod_wattage == req_wattage:
                 reasons.append(f"Identical output wattage: {prod_wattage}W")

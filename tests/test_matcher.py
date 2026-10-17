@@ -54,7 +54,8 @@ def test_incompatible_product_wattage_rejection():
 
     match_type, conf, reasons, incomp_reasons = evaluate_product_match(requested_specs, candidate_15w)
     assert match_type == "INCOMPATIBLE"
-    assert any("Insufficient wattage" in r for r in incomp_reasons)
+    assert any("Wattage deficit" in r for r in incomp_reasons)
+
 
 
 def test_incompatible_category_mismatch():

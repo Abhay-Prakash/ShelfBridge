@@ -478,7 +478,8 @@ export default function App() {
   const [demoStep, setDemoStep] = useState(1);
 
   const [auditLog, setAuditLog] = useState([
-    { id: 'evt-4', time: '18:52:14', actor: 'MatchingService (ROCm)', action: 'Ranked 3 neighbourhood candidates for REQ-1042 (1 Exact, 1 Compatible Substitute, 1 Flagged Incompatible)', type: 'match' },
+    { id: 'evt-4', time: '18:52:14', actor: 'MatchingService (AMD AVX2)', action: 'Ranked 3 neighbourhood candidates for REQ-1042 (1 Exact, 1 Compatible Substitute, 1 Flagged Incompatible)', type: 'match' },
+
     { id: 'evt-3', time: '18:52:10', actor: 'Shop A (Rajesh V.)', action: 'Created unmet-demand request REQ-1042 for ANK-A2663-65W (65W USB-C Charger)', type: 'request' },
     { id: 'evt-2', time: '18:45:10', actor: 'ReservationService', action: 'Atomic lock RES-882 acquired on 1 unit of POR-PB20K-65W at Shop B (15m hold)', type: 'reserve' },
     { id: 'evt-1', time: '17:26:12', actor: 'FulfilmentService', action: 'Completed handover for REQ-1039. Recovered ₹900 sale (+₹130 net contribution)', type: 'fulfil' }

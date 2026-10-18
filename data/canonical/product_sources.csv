@@ -1,0 +1,37 @@
+product_id,sku,brand,model_number,source_type,source_url,verification_status,notes
+prod_ank_a2663_65w,ANK-A2663-65W,Anker,A2663,MANUFACTURER_SPECS,https://www.anker.com/products/a2663,VERIFIED_MANUFACTURER_SPECS,Official Anker Nano II 65W GaN II Tech Datasheet
+prod_sam_ep_ta800_25w,SAM-CHG-25W-TA800,Samsung,EP-TA800,MANUFACTURER_SPECS,https://www.samsung.com/in/mobile-accessories/25w-power-adapter-black-ep-ta800nbegin/,VERIFIED_MANUFACTURER_SPECS,Samsung India Official TA800 Specifications
+prod_sam_ep_ta200_15w,SAM-CHG-15W-TA200,Samsung,EP-TA200,MANUFACTURER_SPECS,https://www.samsung.com/in/mobile-accessories/adaptive-fast-charging-travel-adapter-ep-ta200/,VERIFIED_MANUFACTURER_SPECS,Samsung India Official TA200 AFC Specification
+prod_sam_ep_t6530_65w,SAM-EPT6530-65W,Samsung,EP-T6530,MANUFACTURER_SPECS,https://www.samsung.com/in/mobile-accessories/power-adapter-trio-65w-ep-t6530nbegind/,VERIFIED_MANUFACTURER_SPECS,Samsung 65W Trio Dual Type-C + USB-A Spec
+prod_ank_a2146_30w,ANK-CHG-30W-A2146,Anker,A2146,MANUFACTURER_SPECS,https://www.anker.com/products/a2146,VERIFIED_MANUFACTURER_SPECS,Anker 511 Nano 3 30W PIQ 3.0 Datasheet
+prod_ank_a2643_45w,ANK-A2643-45W,Anker,A2643,MANUFACTURER_SPECS,https://www.anker.com/products/a2643,VERIFIED_MANUFACTURER_SPECS,Anker Nano II 45W Compact Fast Charger Spec
+prod_ank_a2668_65w,ANK-CHG-65W-A2668,Anker,A2668,MANUFACTURER_SPECS,https://www.anker.com/products/a2668,VERIFIED_MANUFACTURER_SPECS,Anker 735 GaNPrime 65W 3-Port Datasheet
+prod_apl_mhje3_20w,APL-CHG-20W-MHJE3,Apple,MHJE3HN/A,MANUFACTURER_SPECS,https://www.apple.com/in/shop/product/MHJE3HN/A/20w-usb-c-power-adapter,VERIFIED_MANUFACTURER_SPECS,Apple India Official 20W USB-C Store Spec
+prod_apl_mnwp3_35w,APL-CHG-35W-MNWP3,Apple,MNWP3HN/A,MANUFACTURER_SPECS,https://www.apple.com/in/shop/product/MNWP3HN/A/35w-dual-usb-c-port-power-adapter,VERIFIED_MANUFACTURER_SPECS,Apple 35W Dual USB-C Official Spec
+prod_apl_mw2m3_70w,APL-CHG-70W-MNT93,Apple,MNT93HN/A,MANUFACTURER_SPECS,https://www.apple.com/in/shop/product/MNT93HN/A/70w-usb-c-power-adapter,VERIFIED_MANUFACTURER_SPECS,Apple 70W USB-C Adapter Official Spec
+prod_mi_mdy12eh_67w,MI-CHG-67W-MDY12EH,Mi,MDY-12-EH,MANUFACTURER_SPECS,https://www.mi.com/in/product/mi-67w-soniccharge-3-0-charger-combo/,VERIFIED_MANUFACTURER_SPECS,Xiaomi India Official SonicCharge 67W Spec
+prod_mi_mdy11em_33w,MI-CHG-33W-MDY11EM,Mi,MDY-11-EM,MANUFACTURER_SPECS,https://www.mi.com/in/product/mi-33w-soniccharge-2-0-charger-combo/,VERIFIED_MANUFACTURER_SPECS,Xiaomi India Official 33W Fast Charger
+prod_op_vck8hach_80w,OP-CHG-80W-VCK8,OnePlus,VCK8HACH,MANUFACTURER_SPECS,https://www.oneplus.in/product/oneplus-supervooc-80w-power-adapter,VERIFIED_MANUFACTURER_SPECS,OnePlus India SUPERVOOC 80W Official
+prod_spg_pe2008_qi2,SPG-QI2-15W,Spigen,PE2008,MANUFACTURER_SPECS,https://www.spigen.com/products/arcfield-qi2-wireless-charger,VERIFIED_MANUFACTURER_SPECS,Spigen ArcField Qi2 15W Certification
+prod_boat_deuce_300_100w,BOAT-CBL-100W-CC,boAt,Deuce-300,MANUFACTURER_SPECS,https://www.boat-lifestyle.com/products/deuce-usb-300-type-c-to-type-c-cable,VERIFIED_MANUFACTURER_SPECS,boAt Lifestyle Official Deuce 300 100W Cable
+prod_sam_ep_dn975_100w,SAM-CBL-100W-5A,Samsung,EP-DN975,MANUFACTURER_SPECS,https://www.samsung.com/in/mobile-accessories/type-c-to-type-c-cable-ep-dn975/,VERIFIED_MANUFACTURER_SPECS,Samsung 5A 100W C-to-C Cable Technical Guide
+prod_bel_cab100w_2m,BEL-CAB100W-2M,Belkin,CAB014,MANUFACTURER_SPECS,https://www.belkin.com/in/boostcharge-braided-usb-c-to-usb-c-cable-100w/P-CAB014.html,VERIFIED_MANUFACTURER_SPECS,Belkin BoostCharge Pro 100W E-Marker Cable
+prod_ank_a8482_100w,ANK-CBL-100W-A8482,Anker,A8482,MANUFACTURER_SPECS,https://www.anker.com/products/a8482,VERIFIED_MANUFACTURER_SPECS,Anker 333 100W USB-C Cable Datasheet
+prod_boat_rugged_v3_18w,BOAT-CBL-ATC-60W,boAt,Rugged-V3,MANUFACTURER_SPECS,https://www.boat-lifestyle.com/products/rugged-v3-cable,VERIFIED_MANUFACTURER_SPECS,boAt Rugged V3 3A A-to-C Cable Spec
+prod_apl_mm0a3_ltc,APL-CBL-LTC-1M,Apple,MM0A3ZM/A,MANUFACTURER_SPECS,https://www.apple.com/in/shop/product/MM0A3ZM/A/usb-c-to-lightning-cable-1-m,VERIFIED_MANUFACTURER_SPECS,Apple Official USB-C to Lightning Cable
+prod_ank_a8832_ltc,ANK-CBL-LTC-09M,Anker,A8832,MANUFACTURER_SPECS,https://www.anker.com/products/a8832,VERIFIED_MANUFACTURER_SPECS,Anker PowerLine III MFi Lightning Spec
+prod_sam_ep_dg930_atc,SAM-CBL-ATC-15M,Samsung,EP-DG930,MANUFACTURER_SPECS,https://www.samsung.com/in/mobile-accessories/usb-to-type-c-cable-ep-dg930/,VERIFIED_MANUFACTURER_SPECS,Samsung OEM USB-A to Type-C Cable
+prod_bel_caa004_ltc,BEL-CBL-LTC-1M,Belkin,CAA004,MANUFACTURER_SPECS,https://www.belkin.com/in/boostcharge-braided-usb-c-to-lightning-cable/P-CAA004.html,VERIFIED_MANUFACTURER_SPECS,Belkin Braided C-to-Lightning MFi Cable
+prod_mi_plm18zm_20k,MI-PB-20000-3I,Mi,PLM18ZM,MANUFACTURER_SPECS,https://www.mi.com/in/product/mi-power-bank-3i-20000mah/,VERIFIED_MANUFACTURER_SPECS,Xiaomi India Official Mi 3i 20000mAh Spec
+prod_mi_bhr5121in_10k,MI-PB-10000-PRO,Mi,PB1022ZM,MANUFACTURER_SPECS,https://www.mi.com/in/product/mi-pocket-power-bank-pro-10000mah/,VERIFIED_MANUFACTURER_SPECS,Xiaomi 10000mAh Pocket Pro Specs
+prod_amb_pl_ultra_65w,AMB-PB-20000-65W,Ambrane,PL-Ultra-65,MANUFACTURER_SPECS,https://ambraneindia.com/products/powerlit-ultra-powerbank,VERIFIED_MANUFACTURER_SPECS,Ambrane India PowerLit Ultra 65W Spec
+prod_por_luxcell_65w,POR-PB20K-65W,Portronics,POR-1811,MANUFACTURER_SPECS,https://www.portronics.com/products/luxcell-b-20k,VERIFIED_MANUFACTURER_SPECS,Portronics Luxcell 20000mAh 65W Laptop PB
+prod_urb_magpro_10k,URB-PB-10000-MAG,URBN,UPB-10M,MANUFACTURER_SPECS,https://urbnworld.com/products/10000mah-magsafe-wireless-power-bank,VERIFIED_MANUFACTURER_SPECS,URBN 10000mAh MagSafe Spec
+prod_ank_a1611_5k,ANK-PB-5000-MAG,Anker,A1611,MANUFACTURER_SPECS,https://www.anker.com/products/a1611,VERIFIED_MANUFACTURER_SPECS,Anker 622 Magnetic MagGo Battery Spec
+prod_boat_ad141_tws,BOAT-TWS-AD141,boAt,AD-141,MANUFACTURER_SPECS,https://www.boat-lifestyle.com/products/airdopes-141,VERIFIED_MANUFACTURER_SPECS,boAt Airdopes 141 Product Spec
+prod_boat_rb255_pro,BOAT-NCK-255PRO,boAt,Rockerz-255-Pro+,MANUFACTURER_SPECS,https://www.boat-lifestyle.com/products/rockerz-255-pro-plus,VERIFIED_MANUFACTURER_SPECS,boAt Rockerz 255 Pro+ Spec
+prod_oneplus_bullets_z2,OP-NCK-BZ2-ANC,OnePlus,E305A,MANUFACTURER_SPECS,https://www.oneplus.in/product/oneplus-bullets-wireless-z2-anc,VERIFIED_MANUFACTURER_SPECS,OnePlus Bullets Wireless Z2 ANC Official
+prod_realme_t300_tws,REAL-TWS-T300,realme,RMA2302,MANUFACTURER_SPECS,https://buy.realme.com/in/goods/660,VERIFIED_MANUFACTURER_SPECS,realme Buds T300 Official Specification
+prod_por_mport_31_hub,POR-HUB-MPORT31,Portronics,POR-1492,MANUFACTURER_SPECS,https://www.portronics.com/products/mport-31,VERIFIED_MANUFACTURER_SPECS,Portronics Mport 31 4-in-1 Hub Specs
+prod_bel_avc009_hub,BEL-HUB-AVC009,Belkin,AVC009,MANUFACTURER_SPECS,https://www.belkin.com/in/7-in-1-usb-c-multimedia-hub/P-AVC009.html,VERIFIED_MANUFACTURER_SPECS,Belkin Connect 7-in-1 85W PD Hub
+prod_logi_m221_mouse,LOGI-MOU-M221,Logitech,M221,MANUFACTURER_SPECS,https://www.logitech.com/en-in/products/mice/m221-silent-wireless-mouse.910-004882.html,VERIFIED_MANUFACTURER_SPECS,Logitech Official M221 Silent Mouse Spec

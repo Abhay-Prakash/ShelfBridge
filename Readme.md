@@ -80,11 +80,6 @@ The goal is not merely to show nearby stock. It is to manage the transaction lif
 
 ## 🔄 How it works
 
-<div align="center">
-
-![Workflow](https://img.shields.io/badge/DEMAND-→-MATCH-0E7490?style=for-the-badge) ![Workflow](https://img.shields.io/badge/MATCH-→-RESERVE-2563EB?style=for-the-badge) ![Workflow](https://img.shields.io/badge/RESERVE-→-SETTLE-059669?style=for-the-badge)
-
-</div>
 
 
 ```mermaid

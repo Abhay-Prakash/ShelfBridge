@@ -345,7 +345,7 @@ export default function UnitEconomicsPage(props) {
                 <div className={`lg:col-span-7 p-5 rounded-xl border ${ui.cardBg} space-y-4`}>
                   <div>
                     <span className="text-[11px] font-mono uppercase tracking-wider text-[#C84B20] font-bold">
-                      Section 7 & 8 · Deterministic Backend & AMD ROCm Workload
+                      Section 7 & 8 · Deterministic Backend & AMD Compute Workload
                     </span>
                     <h3 className="text-base font-bold mt-0.5">
                       FastAPI Service Boundaries & REST API Contract
@@ -365,7 +365,7 @@ export default function UnitEconomicsPage(props) {
                       <tbody className="divide-y divide-stone-200 dark:divide-zinc-800">
                         {[
                           { m: 'POST', ep: '/api/requests', svc: 'RequestService', desc: 'Capture unmet request + LLM attribute normalisation' },
-                          { m: 'GET', ep: '/api/requests/{id}/matches', svc: 'MatchingService', desc: '4-stage deterministic SKU + electrical filter + ROCm rerank' },
+                          { m: 'GET', ep: '/api/requests/{id}/matches', svc: 'MatchingService', desc: '4-stage deterministic SKU + electrical filter + AMD ML rerank' },
                           { m: 'POST', ep: '/api/offers', svc: 'OfferService', desc: 'Supplier confirms shelf stock, transfer price & hold window' },
                           { m: 'POST', ep: '/api/offers/{id}/accept', svc: 'ReservationService', desc: 'Atomic DB row lock (`on_hand - reserved`) & expiry timer' },
                           { m: 'POST', ep: '/api/reservations/{id}/cancel', svc: 'ReservationService', desc: 'Cancel hold & release reserved units exactly once' },

@@ -5,7 +5,9 @@
  * while using real backend-persisted identities.
  */
 
-const BASE_URL = ''; // Relative to origin; proxied by Vite to http://localhost:8000
+// In local dev: empty string → Vite proxies /api/* to localhost:8000
+// On Vercel: set VITE_API_URL=https://your-app.railway.app in Vercel env vars
+const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export class ApiError extends Error {
   constructor(message, status = 500, detail = null) {

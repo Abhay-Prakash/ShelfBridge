@@ -132,9 +132,47 @@ export default function App() {
   // Active Store Perspective: 'store_np_apex' | 'store_np_metrovolt' | 'store_np_quickcharge' | 'network'
   const [activeStoreId, setActiveStoreId] = useState(null);
 
-  // Multi-Page Navigation State (defaults directly to Overview)
-  const [activeTab, setActiveTab] = useState('home');
+  // Multi-Page Navigation State with URL Hash & localStorage persistence
+  const getInitialTab = () => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+      const validPages = ['home', 'dispatch', 'capture', 'matching', 'reservations', 'inventory', 'network', 'demand', 'economics', 'architecture'];
+      if (hash && validPages.includes(hash)) {
+        return hash;
+      }
+      const saved = localStorage.getItem('shelfbridge_active_tab');
+      if (saved && validPages.includes(saved)) {
+        return saved;
+      }
+    }
+    return 'home';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Keep URL hash and localStorage in sync with activeTab
+  useEffect(() => {
+    if (activeTab && typeof window !== 'undefined') {
+      localStorage.setItem('shelfbridge_active_tab', activeTab);
+      if (window.location.hash.replace(/^#\/?/, '').toLowerCase() !== activeTab) {
+        window.history.replaceState(null, '', `#${activeTab}`);
+      }
+    }
+  }, [activeTab]);
+
+  // Support browser Back / Forward buttons via hashchange
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+      const validPages = ['home', 'dispatch', 'capture', 'matching', 'reservations', 'inventory', 'network', 'demand', 'economics', 'architecture'];
+      if (validPages.includes(hash) && hash !== activeTab) {
+        setActiveTab(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeTab]);
 
   // Core Domain State (100% backend-authoritative at runtime)
   const [stores, setStores] = useState([]);

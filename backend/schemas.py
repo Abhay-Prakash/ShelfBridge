@@ -7,6 +7,24 @@ from pydantic import BaseModel, Field
 import datetime
 
 
+class StoreCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=150)
+    owner_name: str = Field(..., min_length=2, max_length=100)
+    phone: str = Field(default="+91 98110 00000", max_length=25)
+    neighbourhood: str = Field(..., min_length=2, max_length=100)
+    address: str = Field(default="Nehru Place Commercial Complex, New Delhi 110019", max_length=255)
+    latitude: float = Field(default=28.5492)
+    longitude: float = Field(default=77.2528)
+
+
+class InventoryUpdate(BaseModel):
+    store_id: str
+    product_id: str
+    quantity_delta: int = Field(..., description="Units to add or remove (e.g. +2 or -1)")
+    transfer_price: Optional[float] = None
+    retail_price: Optional[float] = None
+
+
 class StoreOut(BaseModel):
     id: str
     name: str
@@ -138,8 +156,40 @@ class ReservationOut(BaseModel):
 
 class FulfilmentHandover(BaseModel):
     handover_code: str
-    actual_customer_price: Optional[float] = None
-    logistics_cost: float = Field(default=30.0, ge=0.0)
+    actual_customer_price_per_unit: Optional[float] = Field(
+        default=None,
+        description="Agreed per-unit customer sale price in INR. Multiplied by quantity to determine total GMV."
+    )
+    actual_customer_price: Optional[float] = Field(
+        default=None,
+        description="Legacy alias for actual_customer_price_per_unit. Permitted for backwards compatibility."
+    )
+    logistics_cost: float = Field(
+        default=30.0,
+        ge=0.0,
+        description="Flat per-order runner/delivery fee (not multiplied by quantity)."
+    )
+
+    def get_actual_unit_price(self) -> Optional[float]:
+        """
+        Resolves unambiguous per-unit price:
+        - If both are supplied and differ, raises ValueError (HTTP 400).
+        - If both are supplied and agree, returns the agreed price.
+        - If only one is supplied, returns that price.
+        - If neither is supplied, returns None for documented MRP fallback.
+        """
+        if self.actual_customer_price_per_unit is not None and self.actual_customer_price is not None:
+            if abs(self.actual_customer_price_per_unit - self.actual_customer_price) > 0.001:
+                raise ValueError(
+                    f"Conflicting price fields supplied: actual_customer_price_per_unit ({self.actual_customer_price_per_unit}) "
+                    f"and legacy actual_customer_price ({self.actual_customer_price}) do not match."
+                )
+            return self.actual_customer_price_per_unit
+
+        if self.actual_customer_price_per_unit is not None:
+            return self.actual_customer_price_per_unit
+
+        return self.actual_customer_price
 
 
 class TransactionOutcomeOut(BaseModel):

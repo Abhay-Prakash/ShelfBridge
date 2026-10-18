@@ -1,6 +1,7 @@
 import darkLogo from '../assets/logo-darktheme.png';
 import lightLogo from '../assets/logo-lighttheme.png';
 import React, { useState, useEffect, useMemo } from 'react';
+import { api, adaptMatchCandidate, adaptRequest } from './api/client';
 import {
   Store,
   Search,
@@ -48,346 +49,12 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// SEEDED DOMAIN DATA (Strictly grounded in ShelfBridge_Product_and_Business_Plan.md)
+// DOMAIN DATA: 100% Backend-Authoritative
+// Stores, catalogue, inventory, requests, and demand analytics are fetched
+// dynamically from the FastAPI backend. No static sample records are used as
+// runtime state defaults.
 // ============================================================================
 
-const INITIAL_STORES = [
-  {
-    id: 'store-a',
-    code: 'SHP-A',
-    name: 'Apex Mobile & Tech',
-    neighbourhood: 'Nehru Place · Block B (Ground Floor)',
-    distanceMeters: 0,
-    distanceLabel: 'Your Store (Origin)',
-    owner: 'Rajesh Verma',
-    role: 'Primary Requesting & Supplying Node',
-    trustScore: 98,
-    avgConfirmMins: 1.8,
-    phone: '+91 98112 •••41',
-    completedTransfers: 34,
-    activeSince: 'Pilot Week 1'
-  },
-  {
-    id: 'store-b',
-    code: 'SHP-B',
-    name: 'MetroVolt Electronics',
-    neighbourhood: 'Nehru Place · Block C (180m walk)',
-    distanceMeters: 180,
-    distanceLabel: '180m · 2 min walk',
-    owner: 'Vikram Sethi',
-    role: 'Verified Neighbourhood Partner',
-    trustScore: 96,
-    avgConfirmMins: 2.1,
-    phone: '+91 98180 •••92',
-    completedTransfers: 29,
-    activeSince: 'Pilot Week 1'
-  },
-  {
-    id: 'store-c',
-    code: 'SHP-C',
-    name: 'QuickCharge Accessory Hub',
-    neighbourhood: 'Nehru Place · Arcade Lane (310m walk)',
-    distanceMeters: 310,
-    distanceLabel: '310m · 4 min walk',
-    owner: 'Amanpreet Singh',
-    role: 'Verified Neighbourhood Partner',
-    trustScore: 93,
-    avgConfirmMins: 3.4,
-    phone: '+91 99104 •••18',
-    completedTransfers: 21,
-    activeSince: 'Pilot Week 2'
-  }
-];
-
-const INITIAL_CATALOGUE = [
-  {
-    id: 'prod-1',
-    sku: 'ANK-A2663-65W',
-    barcode: '848061026634',
-    name: 'Anker Nano II 65W GaN USB-C Charger',
-    brand: 'Anker',
-    category: 'Charger',
-    attributes: {
-      connector: 'USB-C',
-      wattage: 65,
-      protocols: ['USB-PD 3.0', 'PPS', 'QC 4+'],
-      outputSpec: '20V ⎓ 3.25A Max',
-      compatibility: ['MacBook Air/Pro', 'Samsung S24 Ultra', 'Dell XPS', 'iPhone 15/16']
-    },
-    mrp: 2499,
-    typicalSalePrice: 1200,
-    typicalTransferPrice: 1000
-  },
-  {
-    id: 'prod-2',
-    sku: 'SAM-EPT6530-65W',
-    barcode: '880609297821',
-    name: 'Samsung 65W Power Adapter Trio (USB-C PD/PPS)',
-    brand: 'Samsung',
-    category: 'Charger',
-    attributes: {
-      connector: 'USB-C',
-      wattage: 65,
-      protocols: ['USB-PD 3.0', 'PPS Super Fast 2.0'],
-      outputSpec: '20V ⎓ 3.25A (65W Single Port)',
-      compatibility: ['Galaxy Book', 'Samsung S24 Ultra', 'USB-C Laptops', 'Tablets']
-    },
-    mrp: 2999,
-    typicalSalePrice: 1350,
-    typicalTransferPrice: 1120
-  },
-  {
-    id: 'prod-3',
-    sku: 'ANK-A2643-45W',
-    barcode: '848061026436',
-    name: 'Anker Nano II 45W Compact USB-C Charger',
-    brand: 'Anker',
-    category: 'Charger',
-    attributes: {
-      connector: 'USB-C',
-      wattage: 45,
-      protocols: ['USB-PD 3.0', 'PPS'],
-      outputSpec: '20V ⎓ 2.25A Max (45W Limit)',
-      compatibility: ['Samsung S24+', 'MacBook Air M1/M2', 'iPad Pro']
-    },
-    mrp: 1899,
-    typicalSalePrice: 950,
-    typicalTransferPrice: 780
-  },
-  {
-    id: 'prod-4',
-    sku: 'BEL-CAB100W-2M',
-    barcode: '745883829104',
-    name: 'Belkin BoostCharge Pro 100W USB-C to USB-C Braided Cable (2m)',
-    brand: 'Belkin',
-    category: 'Cable',
-    attributes: {
-      connector: 'USB-C to USB-C',
-      wattage: 100,
-      length: '2.0m',
-      protocols: ['E-Marker 5A', 'USB-PD 100W', '480Mbps Data'],
-      outputSpec: '20V ⎓ 5A (100W)',
-      compatibility: ['16" MacBook Pro', 'iPhone 15/16 Pro', 'iPad', 'Gaming Laptops']
-    },
-    mrp: 1499,
-    typicalSalePrice: 900,
-    typicalTransferPrice: 720
-  },
-  {
-    id: 'prod-5',
-    sku: 'POR-PB20K-65W',
-    barcode: '890433681120',
-    name: 'Portronics Luxcell 20000mAh 65W PD Laptop Power Bank',
-    brand: 'Portronics',
-    category: 'Power Bank',
-    attributes: {
-      connector: 'Dual USB-C + USB-A',
-      wattage: 65,
-      capacity: '20000mAh (74Wh)',
-      protocols: ['Bidirectional PD 3.0', 'QC 3.0', 'PPS'],
-      outputSpec: '20V ⎓ 3.25A (65W Laptop Out)',
-      compatibility: ['Type-C Laptops', 'Steam Deck', 'Smartphones']
-    },
-    mrp: 3499,
-    typicalSalePrice: 1850,
-    typicalTransferPrice: 1550
-  },
-  {
-    id: 'prod-6',
-    sku: 'SPG-QI2-15W',
-    barcode: '880989674512',
-    name: 'Spigen ArcField Qi2 MagSafe 15W Wireless Charger Pad',
-    brand: 'Spigen',
-    category: 'Charger',
-    attributes: {
-      connector: 'MagSafe / Qi2 Wireless (USB-C In)',
-      wattage: 15,
-      protocols: ['Qi2 Certified', 'MagSafe 15W'],
-      outputSpec: '15W Magnetic Fast Wireless',
-      compatibility: ['iPhone 12/13/14/15/16 Series', 'AirPods Pro']
-    },
-    mrp: 2199,
-    typicalSalePrice: 1400,
-    typicalTransferPrice: 1150
-  }
-];
-
-const INITIAL_INVENTORY = [
-  { id: 'inv-a1', storeId: 'store-a', productId: 'prod-1', onHand: 0, reserved: 0, transferPrice: 1000, acquisitionCost: 840, lastUpdated: '12 mins ago' },
-  { id: 'inv-a2', storeId: 'store-a', productId: 'prod-2', onHand: 0, reserved: 0, transferPrice: 1120, acquisitionCost: 950, lastUpdated: '25 mins ago' },
-  { id: 'inv-a3', storeId: 'store-a', productId: 'prod-4', onHand: 3, reserved: 1, transferPrice: 720, acquisitionCost: 590, lastUpdated: '4 mins ago' },
-  { id: 'inv-a4', storeId: 'store-a', productId: 'prod-5', onHand: 0, reserved: 0, transferPrice: 1550, acquisitionCost: 1320, lastUpdated: '18 mins ago' },
-  { id: 'inv-a5', storeId: 'store-a', productId: 'prod-6', onHand: 2, reserved: 0, transferPrice: 1150, acquisitionCost: 960, lastUpdated: '9 mins ago' },
-
-  { id: 'inv-b1', storeId: 'store-b', productId: 'prod-1', onHand: 4, reserved: 0, transferPrice: 1000, acquisitionCost: 830, lastUpdated: '2 mins ago' },
-  { id: 'inv-b2', storeId: 'store-b', productId: 'prod-2', onHand: 2, reserved: 0, transferPrice: 1120, acquisitionCost: 940, lastUpdated: '7 mins ago' },
-  { id: 'inv-b3', storeId: 'store-b', productId: 'prod-4', onHand: 0, reserved: 0, transferPrice: 720, acquisitionCost: 600, lastUpdated: '31 mins ago' },
-  { id: 'inv-b4', storeId: 'store-b', productId: 'prod-5', onHand: 3, reserved: 0, transferPrice: 1550, acquisitionCost: 1310, lastUpdated: '5 mins ago' },
-
-  { id: 'inv-c1', storeId: 'store-c', productId: 'prod-3', onHand: 5, reserved: 0, transferPrice: 780, acquisitionCost: 640, lastUpdated: '6 mins ago' },
-  { id: 'inv-c2', storeId: 'store-c', productId: 'prod-2', onHand: 1, reserved: 0, transferPrice: 1140, acquisitionCost: 960, lastUpdated: '14 mins ago' },
-  { id: 'inv-c3', storeId: 'store-c', productId: 'prod-4', onHand: 6, reserved: 0, transferPrice: 710, acquisitionCost: 580, lastUpdated: '3 mins ago' },
-  { id: 'inv-c4', storeId: 'store-c', productId: 'prod-6', onHand: 3, reserved: 0, transferPrice: 1130, acquisitionCost: 950, lastUpdated: '11 mins ago' }
-];
-
-const INITIAL_REQUESTS = [
-  {
-    id: 'REQ-1042',
-    requestingStoreId: 'store-a',
-    rawQuery: 'Customer needs Anker 65W GaN USB-C charger (ANK-A2663-65W) for laptop & S24 Ultra fast charge',
-    category: 'Charger',
-    requestedSku: 'ANK-A2663-65W',
-    requestedBarcode: '848061026634',
-    requestedBrand: 'Anker',
-    requiredSpecs: {
-      connector: 'USB-C',
-      minWattage: 65,
-      protocols: ['USB-PD 3.0', 'PPS']
-    },
-    quantity: 1,
-    customerDeadlineMins: 15,
-    allowSubstitutes: true,
-    customerSalePrice: 1200,
-    deliveryCost: 50,
-    platformFee: 20,
-    status: 'matched',
-    selectedCandidateId: null,
-    offerDetails: null,
-    reservationDetails: null,
-    createdAt: '18:52:10',
-    updatedAt: '18:52:14'
-  },
-  {
-    id: 'REQ-1041',
-    requestingStoreId: 'store-a',
-    rawQuery: 'Portronics 20000mAh 65W PD Laptop Power Bank (POR-PB20K-65W)',
-    category: 'Power Bank',
-    requestedSku: 'POR-PB20K-65W',
-    requestedBarcode: '890433681120',
-    requestedBrand: 'Portronics',
-    requiredSpecs: {
-      connector: 'Dual USB-C + USB-A',
-      minWattage: 65,
-      protocols: ['Bidirectional PD 3.0']
-    },
-    quantity: 1,
-    customerDeadlineMins: 20,
-    allowSubstitutes: false,
-    customerSalePrice: 1850,
-    deliveryCost: 50,
-    platformFee: 20,
-    status: 'reserved',
-    selectedCandidateId: 'store-b__prod-5',
-    offerDetails: {
-      supplierStoreId: 'store-b',
-      productId: 'prod-5',
-      confirmedQty: 1,
-      transferPrice: 1550,
-      deliveryCharge: 50,
-      holdMinutes: 15,
-      confirmedBy: 'Vikram Sethi (MetroVolt)',
-      confirmedAt: '18:44:02'
-    },
-    reservationDetails: {
-      id: 'RES-882',
-      expiresInSeconds: 510,
-      lockedUnits: 1,
-      handoverCode: '4829',
-      createdAt: '18:45:10'
-    },
-    createdAt: '18:41:00',
-    updatedAt: '18:45:10'
-  },
-  {
-    id: 'REQ-1039',
-    requestingStoreId: 'store-b',
-    rawQuery: 'Belkin 100W 2m USB-C to USB-C E-Marker braided cable',
-    category: 'Cable',
-    requestedSku: 'BEL-CAB100W-2M',
-    requestedBarcode: '745883829104',
-    requestedBrand: 'Belkin',
-    requiredSpecs: {
-      connector: 'USB-C to USB-C',
-      minWattage: 100,
-      protocols: ['E-Marker 5A']
-    },
-    quantity: 1,
-    customerDeadlineMins: 15,
-    allowSubstitutes: true,
-    customerSalePrice: 900,
-    deliveryCost: 40,
-    platformFee: 20,
-    status: 'fulfilled',
-    selectedCandidateId: 'store-c__prod-4',
-    offerDetails: {
-      supplierStoreId: 'store-c',
-      productId: 'prod-4',
-      confirmedQty: 1,
-      transferPrice: 710,
-      deliveryCharge: 40,
-      holdMinutes: 15,
-      confirmedBy: 'Amanpreet Singh (QuickCharge)',
-      confirmedAt: '17:19:30'
-    },
-    reservationDetails: {
-      id: 'RES-879',
-      expiresInSeconds: 0,
-      lockedUnits: 1,
-      handoverCode: '7310',
-      completedAt: '17:26:12'
-    },
-    createdAt: '17:18:05',
-    updatedAt: '17:26:12'
-  },
-  {
-    id: 'REQ-1038',
-    requestingStoreId: 'store-a',
-    rawQuery: 'Anker 65W GaN USB-C Charger for walk-in buyer',
-    category: 'Charger',
-    requestedSku: 'ANK-A2663-65W',
-    requestedBarcode: '848061026634',
-    requestedBrand: 'Anker',
-    requiredSpecs: {
-      connector: 'USB-C',
-      minWattage: 65,
-      protocols: ['USB-PD 3.0', 'PPS']
-    },
-    quantity: 1,
-    customerDeadlineMins: 15,
-    allowSubstitutes: false,
-    customerSalePrice: 1200,
-    deliveryCost: 50,
-    platformFee: 20,
-    status: 'fulfilled',
-    selectedCandidateId: 'store-b__prod-1',
-    offerDetails: {
-      supplierStoreId: 'store-b',
-      productId: 'prod-1',
-      confirmedQty: 1,
-      transferPrice: 1000,
-      deliveryCharge: 50,
-      holdMinutes: 15,
-      confirmedBy: 'Vikram Sethi (MetroVolt)',
-      confirmedAt: '16:12:45'
-    },
-    reservationDetails: {
-      id: 'RES-874',
-      expiresInSeconds: 0,
-      lockedUnits: 1,
-      handoverCode: '9104',
-      completedAt: '16:19:50'
-    },
-    createdAt: '16:10:11',
-    updatedAt: '16:19:50'
-  }
-];
-
-const AGGREGATE_UNMET_DEMAND = [
-  { sku: 'ANK-A2663-65W', name: 'Anker Nano II 65W GaN USB-C Charger', category: 'Charger', weeklyRequests: 19, recoveredCount: 14, unfulfilledCount: 5, avgMargin: 130, peakWindow: '14:00 – 19:00', recommendation: 'High velocity across Block B & C — increase safety stock by +6 units' },
-  { sku: 'POR-PB20K-65W', name: 'Portronics Luxcell 20000mAh 65W PD Power Bank', category: 'Power Bank', weeklyRequests: 12, recoveredCount: 9, unfulfilledCount: 3, avgMargin: 230, peakWindow: '17:00 – 20:30', recommendation: 'Frequent laptop commuter demand between 17:00–20:00' },
-  { sku: 'BEL-CAB100W-2M', name: 'Belkin 100W E-Marker USB-C to C Cable (2m)', category: 'Cable', weeklyRequests: 15, recoveredCount: 13, unfulfilledCount: 2, avgMargin: 130, peakWindow: '12:00 – 16:00', recommendation: 'Well-supplied at QuickCharge Hub; Shop A & B under-stocked' },
-  { sku: 'APPL-35W-DUAL', name: 'Apple 35W Dual USB-C Port Compact Power Adapter', category: 'Charger', weeklyRequests: 11, recoveredCount: 2, unfulfilledCount: 9, avgMargin: 210, peakWindow: '15:00 – 19:30', recommendation: 'Cluster-wide deficit — 0 units in 300m radius. Priority distributor order' }
-];
 
 const DEMO_STEPS = [
   {
@@ -462,28 +129,28 @@ export default function App() {
     }
   }, [isDark]);
 
-  // Active Store Perspective: 'store-a' | 'store-b' | 'store-c' | 'network'
-  const [activeStoreId, setActiveStoreId] = useState('store-a');
+  // Active Store Perspective: 'store_np_apex' | 'store_np_metrovolt' | 'store_np_quickcharge' | 'network'
+  const [activeStoreId, setActiveStoreId] = useState(null);
 
   // Multi-Page Navigation State (defaults directly to Overview)
   const [activeTab, setActiveTab] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Core Domain State
-  const [stores, setStores] = useState(INITIAL_STORES);
-  const [catalogue, setCatalogue] = useState(INITIAL_CATALOGUE);
-  const [inventory, setInventory] = useState(INITIAL_INVENTORY);
-  const [requests, setRequests] = useState(INITIAL_REQUESTS);
-  const [selectedRequestId, setSelectedRequestId] = useState('REQ-1042');
+  // Core Domain State (100% backend-authoritative at runtime)
+  const [stores, setStores] = useState([]);
+  const [catalogue, setCatalogue] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
   const [demoStep, setDemoStep] = useState(1);
+  const [demandInsights, setDemandInsights] = useState([]);
 
-  const [auditLog, setAuditLog] = useState([
-    { id: 'evt-4', time: '18:52:14', actor: 'MatchingService (Deterministic Rules)', action: 'Ranked 3 neighbourhood candidates for REQ-1042 (1 Exact, 1 Compatible Substitute, 1 Flagged Incompatible)', type: 'match' },
+  // Domain loading & error lifecycle state
+  const [domainLoading, setDomainLoading] = useState(true);
+  const [domainError, setDomainError] = useState(null);
 
-    { id: 'evt-3', time: '18:52:10', actor: 'Shop A (Rajesh V.)', action: 'Created unmet-demand request REQ-1042 for ANK-A2663-65W (65W USB-C Charger)', type: 'request' },
-    { id: 'evt-2', time: '18:45:10', actor: 'ReservationService', action: 'Atomic lock RES-882 acquired on 1 unit of POR-PB20K-65W at Shop B (15m hold)', type: 'reserve' },
-    { id: 'evt-1', time: '17:26:12', actor: 'FulfilmentService', action: 'Completed handover for REQ-1039. Recovered ₹900 sale (+₹130 net contribution)', type: 'fulfil' }
-  ]);
+  const [auditLog, setAuditLog] = useState([]);
+  const [financialSummary, setFinancialSummary] = useState(null);
 
   const [toast, setToast] = useState(null);
   const triggerToast = (title, detail, tone = 'info') => {
@@ -496,9 +163,107 @@ export default function App() {
   const [isBenchmarking, setIsBenchmarking] = useState(false);
   const [showBenchmarkModal, setShowBenchmarkModal] = useState(false);
 
+  // Re-usable loader function to refetch requests and inventory cleanly from backend
+  const refetchRequestsAndInventory = async () => {
+    try {
+      const [liveReqs, liveInv, liveEvents, summary] = await Promise.all([
+        api.getRequests(),
+        api.getAllInventory(),
+        api.getAuditEvents(30),
+        api.getFinancialSummary()
+      ]);
+      if (liveInv) setInventory(liveInv);
+      if (summary) setFinancialSummary(summary);
+      if (liveReqs) {
+        const adapted = liveReqs.map((r) => adaptRequest(r, catalogue));
+        setRequests(adapted);
+      }
+      if (liveEvents && liveEvents.length > 0) {
+        setAuditLog(
+          liveEvents.map((e) => ({
+            id: e.id,
+            time: e.time,
+            actor: e.actor_store_id ? e.actor_store_id.toUpperCase() : 'System',
+            action: `${e.event_type}: ${JSON.stringify(e.payload || {})}`,
+            type: e.event_type.toLowerCase()
+          }))
+        );
+      }
+    } catch (e) {
+      console.warn('Refetch error:', e);
+    }
+  };
+
+  // Primary Domain Data Loader with clear Loading / Error / Empty lifecycle
+  const loadDomainData = async () => {
+    setDomainLoading(true);
+    setDomainError(null);
+    try {
+      const [liveStores, liveProducts, liveInv, liveReqs, insights, events, summary] = await Promise.all([
+        api.getStores(),
+        api.getProducts(),
+        api.getAllInventory(),
+        api.getRequests(),
+        api.getDemandInsights(),
+        api.getAuditEvents(30),
+        api.getFinancialSummary()
+      ]);
+
+      const loadedStores = liveStores || [];
+      const loadedProducts = liveProducts || [];
+      const loadedInv = liveInv || [];
+      const loadedReqs = liveReqs || [];
+
+      setStores(loadedStores);
+      if (loadedStores.length > 0) {
+        setActiveStoreId((prev) => (prev && loadedStores.some((s) => s.id === prev) ? prev : loadedStores[0].id));
+        setNewStockStore((prev) => (prev && loadedStores.some((s) => s.id === prev) ? prev : loadedStores[0].id));
+      } else {
+        setActiveStoreId(null);
+      }
+
+      setCatalogue(loadedProducts);
+      if (loadedProducts.length > 0) {
+        setNewReqSku((prev) => (prev && loadedProducts.some((p) => p.sku === prev) ? prev : loadedProducts[0].sku));
+        setNewStockProduct((prev) => (prev && loadedProducts.some((p) => p.id === prev) ? prev : loadedProducts[0].id));
+      }
+
+      setInventory(loadedInv);
+
+      const adapted = loadedReqs.map((r) => adaptRequest(r, loadedProducts));
+      setRequests(adapted);
+      setSelectedRequestId((prev) => {
+        if (prev && adapted.some((r) => r.id === prev)) return prev;
+        return adapted[0]?.id || null;
+      });
+
+      setDemandInsights(insights || []);
+      if (summary) setFinancialSummary(summary);
+      if (events && events.length > 0) {
+        setAuditLog(
+          events.map((e) => ({
+            id: e.id,
+            time: e.time,
+            actor: e.actor_store_id ? e.actor_store_id.toUpperCase() : 'System',
+            action: `${e.event_type}: ${JSON.stringify(e.payload || {})}`,
+            type: e.event_type.toLowerCase()
+          }))
+        );
+      }
+      setDomainLoading(false);
+    } catch (err) {
+      console.error('Initial backend loading error:', err);
+      setDomainError(err?.message || 'Failed to connect to ShelfBridge backend service');
+      setDomainLoading(false);
+    }
+  };
+
+  // Connect backend reads on component mount
   useEffect(() => {
-    fetch('/health')
-      .then((res) => res.json())
+    window.__shelfbridge_loadDomainData = loadDomainData;
+
+    // 1. Health check
+    api.getHealth()
       .then((data) => {
         if (data && data.status === 'healthy') {
           setBackendStatus({ connected: true, checking: false, info: data });
@@ -509,7 +274,29 @@ export default function App() {
       .catch(() => {
         setBackendStatus({ connected: false, checking: false, info: null });
       });
+
+    // 2. Fetch authoritative domain data
+    loadDomainData();
+
+    return () => {
+      delete window.__shelfbridge_loadDomainData;
+    };
   }, []);
+
+  // Fetch store inventory whenever active store changes
+  useEffect(() => {
+    if (!activeStoreId || activeStoreId === 'network') return;
+    api.getStoreInventory(activeStoreId)
+      .then((items) => {
+        if (items && items.length > 0) {
+          setInventory((prev) => {
+            const others = prev.filter((i) => i.storeId !== activeStoreId);
+            return [...others, ...items];
+          });
+        }
+      })
+      .catch((err) => console.warn(`Failed to fetch inventory for ${activeStoreId}:`, err));
+  }, [activeStoreId]);
 
   const runAmdBenchmark = async () => {
     setIsBenchmarking(true);
@@ -544,14 +331,15 @@ export default function App() {
           if (req.status === 'reserved' && req.reservationDetails && req.reservationDetails.expiresInSeconds > 0) {
             const nextSec = req.reservationDetails.expiresInSeconds - 1;
             if (nextSec <= 0) {
-              if (req.offerDetails) {
-                setInventory((invPrev) =>
-                  invPrev.map((item) =>
-                    item.storeId === req.offerDetails.supplierStoreId && item.productId === req.offerDetails.productId
-                      ? { ...item, reserved: Math.max(0, item.reserved - req.quantity), lastUpdated: 'Just now' }
-                      : item
-                  )
-                );
+              const resId = req.reservationDetails.backendReservationId;
+              if (resId) {
+                api.expireReservation(resId)
+                  .then(() => {
+                    refetchRequestsAndInventory();
+                    logAudit('ReservationService', `Hold timer expired on ${req.id}. Stock released back to supplier [Backend Confirmed].`, 'cancel');
+                    triggerToast('Reservation Hold Expired', `Hold window elapsed for ${req.id}. Stock hold released by backend domain logic.`, 'info');
+                  })
+                  .catch((err) => console.warn('Backend expire error:', err));
               }
               return {
                 ...req,
@@ -604,8 +392,8 @@ export default function App() {
   const [invStoreFilter, setInvStoreFilter] = useState('all');
   const [invCategoryFilter, setInvCategoryFilter] = useState('all');
   const [showAddStockModal, setShowAddStockModal] = useState(false);
-  const [newStockStore, setNewStockStore] = useState('store-b');
-  const [newStockProduct, setNewStockProduct] = useState('prod-1');
+  const [newStockStore, setNewStockStore] = useState('store_np_metrovolt');
+  const [newStockProduct, setNewStockProduct] = useState('prod_ank_a2663_65w');
   const [newStockDelta, setNewStockDelta] = useState(2);
 
   // Store Onboarding State (Page 7: Store Network)
@@ -616,6 +404,7 @@ export default function App() {
 
   // Handover Verification OTP State (Page 5: Reservations)
   const [handoverOtpInput, setHandoverOtpInput] = useState('');
+  const [customActualPriceInput, setCustomActualPriceInput] = useState('');
 
   const navigateToPage = (pageId) => {
     setActiveTab(pageId);
@@ -654,7 +443,11 @@ export default function App() {
       const product = catalogue.find((p) => p.id === inv.productId);
       if (!store || !product) return;
 
-      if (product.category !== selectedRequest.category) return;
+      // Normalize categories for comparison: product.category may be 'Charger' (Title Case)
+      // while selectedRequest.category might be 'Charger' or 'CHARGERS' depending on path.
+      // Normalize both to uppercase raw category for reliable matching.
+      const normCat = (c) => (c || '').toUpperCase().replace(/[^A-Z]/g, '');
+      if (normCat(product.rawCategory || product.category) !== normCat(selectedRequest.rawCategory || selectedRequest.category)) return;
 
       const availableQty = Math.max(0, inv.onHand - inv.reserved);
 
@@ -662,8 +455,17 @@ export default function App() {
         product.sku.toLowerCase() === (selectedRequest.requestedSku || '').toLowerCase() ||
         product.barcode === selectedRequest.requestedBarcode;
 
+      const normConn = (c) => {
+        const s = (c || '').toLowerCase().replace(/[-_\s]/g, '');
+        if (s.includes('typec') || s.includes('usbc')) return 'usbc';
+        if (s.includes('typea') || s.includes('usba')) return 'usba';
+        if (s.includes('lightning')) return 'lightning';
+        return s;
+      };
       const connectorMatch =
-        product.attributes.connector.toLowerCase().includes(selectedRequest.requiredSpecs.connector.toLowerCase());
+        normConn(product.attributes.connector) === normConn(selectedRequest.requiredSpecs.connector) ||
+        product.attributes.connector.toLowerCase().includes(selectedRequest.requiredSpecs.connector.toLowerCase()) ||
+        selectedRequest.requiredSpecs.connector.toLowerCase().includes(product.attributes.connector.toLowerCase());
       const wattagePass = product.attributes.wattage >= selectedRequest.requiredSpecs.minWattage;
       const protocolMatches = selectedRequest.requiredSpecs.protocols.filter((reqProt) =>
         product.attributes.protocols.some((p) => p.toLowerCase().includes(reqProt.toLowerCase().replace('usb-', '')))
@@ -676,15 +478,29 @@ export default function App() {
       let stageExplanation = [];
       let canReserve = false;
 
+      const totalReqSale = selectedRequest.customerSalePrice != null
+        ? selectedRequest.customerSalePrice * selectedRequest.quantity
+        : null;
+      const totalTransferCost = inv.transferPrice * selectedRequest.quantity;
+      const estPlatformFee = totalReqSale != null
+        ? Math.max(25.0, Math.round(totalReqSale * 0.025 * 100) / 100)
+        : 25.0;
+      const estimatedContribution = totalReqSale != null
+        ? Math.round((totalReqSale - totalTransferCost - selectedRequest.deliveryCost - estPlatformFee) * 100) / 100
+        : null;
+
       if (isExactSku && wattagePass && connectorMatch) {
         matchTier = 'exact';
         matchLabel = 'STAGE 1 · EXACT SKU & GTIN MATCH';
         confidenceScore = 99;
         canReserve = availableQty >= selectedRequest.quantity;
+        const contribStr = estimatedContribution != null
+          ? `+₹${estimatedContribution}${selectedRequest.quantity > 1 ? ` (${selectedRequest.quantity} units)` : ''}`
+          : 'N/A (price unresolved)';
         stageExplanation = [
           `Exact Model/SKU (${product.sku}) & Barcode (${product.barcode}) verified`,
           `Meets ${product.attributes.wattage}W output & ${product.attributes.protocols.join(' + ')}`,
-          `Net Retailer Contribution: ₹${selectedRequest.customerSalePrice - inv.transferPrice - selectedRequest.deliveryCost - selectedRequest.platformFee}`
+          `Est. Net Retailer Contribution: ${contribStr}`
         ];
       } else if (wattagePass && connectorMatch) {
         matchTier = 'substitute';
@@ -709,9 +525,6 @@ export default function App() {
           `Cannot sustain 20V⎓3.25A laptop charging load — prevented false-positive match`
         ];
       }
-
-      const estimatedContribution =
-        selectedRequest.customerSalePrice - inv.transferPrice - selectedRequest.deliveryCost - selectedRequest.platformFee;
 
       results.push({
         candidateId: `${store.id}__${product.id}`,
@@ -747,7 +560,7 @@ export default function App() {
   // ============================================================================
   // WORKFLOW STATE TRANSITION HANDLERS
   // ============================================================================
-  const handlePingSupplier = (candidate) => {
+  const handlePingSupplier = async (candidate) => {
     if (!selectedRequest) return;
     if (candidate.matchTier === 'incompatible') {
       triggerToast(
@@ -788,7 +601,7 @@ export default function App() {
 
     if (demoStep <= 3) setDemoStep(4);
     logAudit(
-      `${stores.find((s) => s.id === selectedRequest.requestingStoreId)?.name}`,
+      `${stores.find((s) => s.id === selectedRequest.requestingStoreId)?.name || selectedRequest.requestingStoreId}`,
       `Requested stock & price confirmation from ${candidate.store.name} for ${candidate.product.sku}`,
       'request'
     );
@@ -799,13 +612,34 @@ export default function App() {
     );
   };
 
-  const handleSupplierConfirmOffer = (reqId, overridePrice, overrideHold) => {
+  const handleSupplierConfirmOffer = async (reqId, overridePrice, overrideHold) => {
     const targetReq = requests.find((r) => r.id === reqId);
     if (!targetReq || !targetReq.offerDetails) return;
 
     const supplierStore = stores.find((s) => s.id === targetReq.offerDetails.supplierStoreId);
     const finalPrice = overridePrice || targetReq.offerDetails.transferPrice;
     const finalHold = overrideHold || 15;
+
+    const beReqId = targetReq.backendId || targetReq.id;
+    let backendOffer = null;
+    try {
+      backendOffer = await api.createOffer({
+        requestId: beReqId,
+        supplyingStoreId: targetReq.offerDetails.supplierStoreId,
+        productId: targetReq.offerDetails.productId,
+        offeredQuantity: targetReq.quantity,
+        unitTransferPrice: Number(finalPrice),
+        validityMinutes: Number(finalHold)
+      });
+    } catch (err) {
+      if (err.status === 409) {
+        triggerToast('Stock Conflict (HTTP 409)', `Cannot create offer: ${err.message || 'Insufficient stock or conflicting hold.'}`, 'error');
+        refetchRequestsAndInventory();
+      } else {
+        triggerToast('Offer Creation Failed', `Backend rejected offer: ${err.message}`, 'error');
+      }
+      return;
+    }
 
     setRequests((prev) =>
       prev.map((r) =>
@@ -815,9 +649,10 @@ export default function App() {
               status: 'offered',
               offerDetails: {
                 ...r.offerDetails,
+                backendOfferId: backendOffer.id,
                 transferPrice: Number(finalPrice),
                 holdMinutes: Number(finalHold),
-                confirmedBy: `${supplierStore?.owner} (${supplierStore?.name})`,
+                confirmedBy: `${supplierStore?.owner || 'Store Partner'} (${supplierStore?.name})`,
                 confirmedAt: new Date().toTimeString().split(' ')[0]
               },
               updatedAt: new Date().toTimeString().split(' ')[0]
@@ -826,10 +661,11 @@ export default function App() {
       )
     );
 
+    refetchRequestsAndInventory();
     if (demoStep === 4) setDemoStep(5);
     logAudit(
-      `${supplierStore?.name}`,
-      `Confirmed ${targetReq.quantity} unit(s) on shelf at ₹${finalPrice} transfer price (${finalHold}m hold offer)`,
+      `${supplierStore?.name || targetReq.offerDetails.supplierStoreId}`,
+      `Confirmed ${targetReq.quantity} unit(s) on shelf at ₹${finalPrice} transfer price (${finalHold}m hold offer) [Backend Confirmed]`,
       'offer'
     );
     triggerToast(
@@ -839,11 +675,21 @@ export default function App() {
     );
   };
 
-  const handleAcceptAndReserve = (reqId) => {
+  const handleAcceptAndReserve = async (reqId) => {
     const targetReq = requests.find((r) => r.id === reqId);
     if (!targetReq || !targetReq.offerDetails) return;
 
-    const { supplierStoreId, productId, holdMinutes } = targetReq.offerDetails;
+    const { supplierStoreId, productId, holdMinutes, backendOfferId } = targetReq.offerDetails;
+
+    if (!backendOfferId) {
+      triggerToast(
+        'Reservation Requires Backend Offer',
+        'The supplier offer was not persisted on the backend. Please re-create the offer through the backend-connected flow before reserving.',
+        'error'
+      );
+      return;
+    }
+
     const invItem = inventory.find((i) => i.storeId === supplierStoreId && i.productId === productId);
     const availableNow = invItem ? invItem.onHand - invItem.reserved : 0;
 
@@ -856,16 +702,43 @@ export default function App() {
       return;
     }
 
-    setInventory((prev) =>
-      prev.map((item) =>
-        item.storeId === supplierStoreId && item.productId === productId
-          ? { ...item, reserved: item.reserved + targetReq.quantity, lastUpdated: 'Just now (Locked)' }
-          : item
-      )
-    );
+    let backendRes = null;
+    try {
+      backendRes = await api.acceptOffer(backendOfferId, holdMinutes || 20);
+    } catch (err) {
+      refetchRequestsAndInventory();
+      if (err.status === 409) {
+        triggerToast(
+          'Reservation Conflict (HTTP 409)',
+          `Stock conflict: ${err.message || 'Stock already reserved or unavailable'}. Stale state refreshed.`,
+          'error'
+        );
+      } else {
+        triggerToast(
+          'Reservation Failed',
+          `Backend rejected reservation: ${err.message}. No stock has been locked.`,
+          'error'
+        );
+      }
+      return;
+    }
 
-    const resId = `RES-${Math.floor(883 + Math.random() * 100)}`;
-    const otp = String(Math.floor(1000 + Math.random() * 9000));
+    const resId = backendRes.id || backendRes.reservation?.id;
+    const fulId = backendRes.fulfilment?.id || backendRes.reservation?.fulfilment?.id;
+    const otp = backendRes.fulfilment?.handover_code || backendRes.reservation?.fulfilment?.handover_code;
+
+    if (!resId || !otp) {
+      triggerToast(
+        'Reservation Response Invalid',
+        'Backend did not return a reservation ID or handover code. Please contact support.',
+        'error'
+      );
+      return;
+    }
+
+    // Refetch authoritative records from backend immediately
+    refetchRequestsAndInventory();
+
     setRequests((prev) =>
       prev.map((r) =>
         r.id === reqId
@@ -874,6 +747,8 @@ export default function App() {
               status: 'reserved',
               reservationDetails: {
                 id: resId,
+                backendReservationId: resId,
+                backendFulfilmentId: fulId,
                 expiresInSeconds: (holdMinutes || 15) * 60,
                 lockedUnits: r.quantity,
                 handoverCode: otp,
@@ -888,7 +763,7 @@ export default function App() {
     if (demoStep === 5) setDemoStep(6);
     logAudit(
       'ReservationService (DB Row Lock)',
-      `Created reservation ${resId} for ${reqId}. Available stock at ${supplierStoreId.toUpperCase()} decremented (${availableNow} → ${availableNow - targetReq.quantity}).`,
+      `Created reservation ${resId} for ${reqId}. Stock locked at ${supplierStoreId.toUpperCase()} (${availableNow} → ${availableNow - targetReq.quantity}) [Backend Committed].`,
       'reserve'
     );
     triggerToast(
@@ -898,27 +773,73 @@ export default function App() {
     );
   };
 
-  const handleCompleteFulfilment = (reqId) => {
+  const handleCompleteFulfilment = async (reqId, customOtp = null, customPrice = null) => {
     const targetReq = requests.find((r) => r.id === reqId);
     if (!targetReq || !targetReq.offerDetails) return;
 
     const { supplierStoreId, productId, transferPrice } = targetReq.offerDetails;
+    const fulId = targetReq.reservationDetails?.backendFulfilmentId;
+    const otp = customOtp !== null ? customOtp : (handoverOtpInput.trim() || targetReq.reservationDetails?.handoverCode);
 
-    setInventory((prev) =>
-      prev.map((item) =>
-        item.storeId === supplierStoreId && item.productId === productId
-          ? {
-              ...item,
-              onHand: Math.max(0, item.onHand - targetReq.quantity),
-              reserved: Math.max(0, item.reserved - targetReq.quantity),
-              lastUpdated: 'Just now (Fulfilled)'
-            }
-          : item
-      )
-    );
+    if (!fulId) {
+      triggerToast(
+        'Fulfilment Requires Backend Reservation',
+        'No backend fulfilment record found. The reservation must have been created through the backend before handover can be completed.',
+        'error'
+      );
+      return;
+    }
 
-    const netContribution =
-      targetReq.customerSalePrice - transferPrice - targetReq.deliveryCost - targetReq.platformFee;
+    // Determine whether an actual customer sale price was explicitly entered or confirmed:
+    // If customPrice parameter is supplied, use it.
+    // Otherwise, check customActualPriceInput state.
+    // If non-empty, parse and validate.
+    // If empty/omitted, do NOT send actualCustomerPricePerUnit, allowing backend MRP fallback.
+    let explicitPricePerUnit = undefined;
+    const rawPriceInput = customPrice !== null ? customPrice : customActualPriceInput.trim();
+    if (rawPriceInput !== '' && rawPriceInput !== null && rawPriceInput !== undefined) {
+      const parsed = Number(rawPriceInput);
+      if (isNaN(parsed)) {
+        triggerToast('Invalid Price', 'Please enter a valid numeric sale price per unit.', 'error');
+        return;
+      }
+      explicitPricePerUnit = parsed;
+    }
+
+    const handoverPayload = {
+      handoverCode: otp,
+      logisticsCost: targetReq.deliveryCost
+    };
+    if (explicitPricePerUnit !== undefined) {
+      handoverPayload.actualCustomerPricePerUnit = explicitPricePerUnit;
+      handoverPayload.actualCustomerPrice = explicitPricePerUnit;
+    }
+
+    let backendOutcome = null;
+    try {
+      backendOutcome = await api.completeFulfilment(fulId, handoverPayload);
+    } catch (err) {
+      triggerToast(
+        'Handover Verification Failed',
+        `Backend rejected: ${err.message}. The sale has NOT been recorded. Verify the PIN and retry.`,
+        'error'
+      );
+      return;
+    }
+
+    // Reset inputs on success
+    setHandoverOtpInput('');
+    setCustomActualPriceInput('');
+
+    // Authoritative refetch from backend — this will populate settledOutcome on the adapted request
+    refetchRequestsAndInventory();
+
+    // Use the backend-calculated settlement figures for all financial display.
+    // backendOutcome is TransactionOutcomeOut: customer_sale_price, requesting_store_margin, platform_fee
+    const settledGmv = backendOutcome?.customer_sale_price ?? targetReq.customerSalePrice ?? 0;
+    const settledMargin = backendOutcome?.requesting_store_margin;
+    const settledPlatformFee = backendOutcome?.platform_fee ?? targetReq.platformFee;
+    const marginDisplay = settledMargin != null ? `+₹${settledMargin}` : '(pending)';
 
     setRequests((prev) =>
       prev.map((r) =>
@@ -926,8 +847,9 @@ export default function App() {
           ? {
               ...r,
               status: 'fulfilled',
+              settledOutcome: backendOutcome,
               reservationDetails: {
-                ...(r.reservationDetails || { id: 'RES-900', lockedUnits: r.quantity }),
+                ...(r.reservationDetails || {}),
                 expiresInSeconds: 0,
                 completedAt: new Date().toTimeString().split(' ')[0]
               },
@@ -939,123 +861,163 @@ export default function App() {
 
     logAudit(
       'FulfilmentService',
-      `${reqId} marked FULFILLED. Recovered Sale: ₹${targetReq.customerSalePrice} | Net Retailer Contribution: +₹${netContribution} | Platform Fee: ₹${targetReq.platformFee}`,
+      `${reqId} marked FULFILLED [Backend Settled]. GMV: ₹${settledGmv} | Net Retailer Contribution: ${marginDisplay} | Platform Fee: ₹${settledPlatformFee}`,
       'fulfil'
     );
     triggerToast(
-      `Sale Recovered! (+₹${targetReq.customerSalePrice} Revenue)`,
-      `Net retailer contribution: +₹${netContribution} after ₹${transferPrice} transfer, ₹${targetReq.deliveryCost} runner & ₹${targetReq.platformFee} ShelfBridge fee.`,
+      `Sale Recovered! (₹${settledGmv} GMV)`,
+      `Net retailer contribution: ${marginDisplay} [Backend Authoritative Settlement Record]`,
       'success'
     );
   };
 
-  const handleCancelReservation = (reqId) => {
+  const handleCancelReservation = async (reqId) => {
     const targetReq = requests.find((r) => r.id === reqId);
     if (!targetReq) return;
 
-    if (targetReq.status === 'reserved' && targetReq.offerDetails) {
-      const { supplierStoreId, productId } = targetReq.offerDetails;
-      setInventory((prev) =>
-        prev.map((item) =>
-          item.storeId === supplierStoreId && item.productId === productId
-            ? {
-                ...item,
-                reserved: Math.max(0, item.reserved - targetReq.quantity),
-                lastUpdated: 'Just now (Released)'
-              }
-            : item
-        )
-      );
+    const resId = targetReq.reservationDetails?.backendReservationId;
+    if (resId) {
+      try {
+        await api.cancelReservation(resId);
+      } catch (err) {
+        triggerToast('Cancellation Failed', `Backend error: ${err.message}`, 'error');
+        return;
+      }
     }
 
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === reqId
-          ? {
-              ...r,
-              status: 'cancelled',
-              reservationDetails: r.reservationDetails ? { ...r.reservationDetails, expiresInSeconds: 0 } : null,
-              updatedAt: new Date().toTimeString().split(' ')[0]
-            }
-          : r
-      )
-    );
-
-    logAudit('ReservationService', `Cancelled ${reqId} and released reserved stock back to available pool.`, 'cancel');
+    refetchRequestsAndInventory();
+    logAudit('ReservationService', `Cancelled ${reqId} and released reserved stock back to available pool [Backend Confirmed].`, 'cancel');
     triggerToast('Reservation Cancelled & Stock Released', `Reserved units for ${reqId} returned to supplier's available stock.`, 'info');
   };
 
-  const handleSimulateRaceCondition = () => {
+  const handleSimulateRaceCondition = async () => {
     if (!selectedRequest) return;
     logAudit(
-      'ConcurrencyGuard (PostgreSQL SELECT FOR UPDATE)',
-      `Blocked duplicate reservation attempt on ${selectedRequest.requestedSku} — active hold lock enforced.`,
+      'ConcurrencyGuard — Genuine Backend Test',
+      `Initiating real backend contention test on ${selectedRequest.requestedSku} via POST /api/reservations/simulate-contention`,
       'cancel'
     );
-    triggerToast(
-      'Concurrency Lock Verified (SELECT ... FOR UPDATE)',
-      'Simulated competing buyer attempt: Database transaction rejected over-reservation beyond available_quantity.',
-      'info'
-    );
+    try {
+      const result = await fetch('/api/reservations/simulate-contention', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          store_id: 'store_np_metrovolt',
+          product_id: 'prod_ank_a2663_65w'
+        })
+      }).then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      });
+      logAudit(
+        'ConcurrencyGuard [Backend Verified]',
+        `Client A locked ${result.client_a_reservation_id}. Client B rejected: ${result.rejection_reason}. State restored: ${result.state_restored}.`,
+        'cancel'
+      );
+      triggerToast(
+        'Genuine Backend Contention Verified ✓',
+        `Client A: ${result.client_a_reservation_id} | Client B rejected: ${result.rejection_reason} | Stock consistent: ${result.state_restored ? 'Yes' : 'No'}`,
+        'success'
+      );
+    } catch (err) {
+      triggerToast(
+        'Contention Test Failed',
+        `Backend error: ${err.message}. Ensure backend is running and MetroVolt has available stock.`,
+        'error'
+      );
+    }
   };
 
-  const handleResetDemo = () => {
-    setStores(INITIAL_STORES);
-    setInventory(INITIAL_INVENTORY);
-    setRequests(INITIAL_REQUESTS);
-    setSelectedRequestId('REQ-1042');
-    setActiveStoreId('store-a');
-    setActiveTab('dispatch');
-    setDemoStep(2);
-    triggerToast('Hackathon Demo Reset', 'All stores, inventory counts, and REQ-1042 restored to initial state.', 'info');
-  };
-
-  const handleParseMessyQuery = (presetType) => {
-    setIsParsingAI(true);
-    setTimeout(() => {
-      if (presetType === 'charger65') {
-        setNewReqInput('Bhaiya Samsung S24 Ultra aur MacBook ke liye 65W USB-C PD PPS fast charger chahiye urgent');
-        setNewReqCategory('Charger');
-        setNewReqSku('ANK-A2663-65W');
-        setScannedBarcode('848061026634');
-        setNewReqMinWattage(65);
-        setNewReqConnector('USB-C');
-        setNewReqProtocols('USB-PD 3.0, PPS');
-        setNewReqSalePrice(1200);
-        setNewReqAllowSub(true);
-      } else if (presetType === 'cable100') {
-        setNewReqInput('Need 2 meter braided Type-C to Type-C 100W 5A E-Marker cable for MacBook Pro');
-        setNewReqCategory('Cable');
-        setNewReqSku('BEL-CAB100W-2M');
-        setScannedBarcode('745883829104');
-        setNewReqMinWattage(100);
-        setNewReqConnector('USB-C to USB-C');
-        setNewReqProtocols('E-Marker 5A, USB-PD 100W');
-        setNewReqSalePrice(900);
-        setNewReqAllowSub(true);
-      } else if (presetType === 'powerbank65') {
-        setNewReqInput('20000mAh power bank that can charge Dell Type-C laptop at 65W PD output');
-        setNewReqCategory('Power Bank');
-        setNewReqSku('POR-PB20K-65W');
-        setScannedBarcode('890433681120');
-        setNewReqMinWattage(65);
-        setNewReqConnector('Dual USB-C + USB-A');
-        setNewReqProtocols('Bidirectional PD 3.0');
-        setNewReqSalePrice(1850);
-        setNewReqAllowSub(false);
-      } else if (presetType === 'wireless15') {
-        setNewReqInput('iPhone 15 Pro ke liye original Qi2 15W magnetic wireless charger pad');
-        setNewReqCategory('Charger');
-        setNewReqSku('SPG-QI2-15W');
-        setScannedBarcode('880989674512');
-        setNewReqMinWattage(15);
-        setNewReqConnector('MagSafe / Qi2 Wireless');
-        setNewReqProtocols('Qi2 Certified, MagSafe 15W');
-        setNewReqSalePrice(1400);
-        setNewReqAllowSub(true);
+  const handleResetDemo = async () => {
+    try {
+      await api.seedDatabase();
+      const [liveStores, liveProducts, liveInv, liveReqs, insights, events, summary] = await Promise.all([
+        api.getStores(),
+        api.getProducts(),
+        api.getAllInventory(),
+        api.getRequests(),
+        api.getDemandInsights(),
+        api.getAuditEvents(30),
+        api.getFinancialSummary()
+      ]);
+      if (summary) setFinancialSummary(summary);
+      if (liveStores) setStores(liveStores);
+      if (liveProducts) setCatalogue(liveProducts);
+      if (liveInv) setInventory(liveInv);
+      if (liveReqs) {
+        const adapted = liveReqs.map((r) => adaptRequest(r, liveProducts || []));
+        setRequests(adapted);
+        setSelectedRequestId(adapted[0]?.id || null);
       }
+      if (insights) setDemandInsights(insights);
+      if (events) {
+        setAuditLog(
+          events.map((e) => ({
+            id: e.id,
+            time: e.time,
+            actor: e.actor_store_id ? e.actor_store_id.toUpperCase() : 'System',
+            action: `${e.event_type}: ${JSON.stringify(e.payload || {})}`,
+            type: e.event_type.toLowerCase()
+          }))
+        );
+      }
+      setActiveStoreId('store_np_apex');
+      setActiveTab('dispatch');
+      setDemoStep(2);
+      triggerToast('Hackathon Demo Reset', 'Backend database re-seeded and reloaded from canonical Nehru Place dataset.', 'info');
+    } catch (err) {
+      triggerToast('Reset Failed', `Backend error: ${err.message}`, 'error');
+    }
+  };
+
+  const handleParseMessyQuery = async (presetType) => {
+    let queryText = '';
+    if (presetType === 'charger65') {
+      queryText = 'Bhaiya Samsung S24 Ultra aur MacBook ke liye 65W USB-C PD PPS fast charger chahiye urgent';
+    } else if (presetType === 'cable100') {
+      queryText = 'Need 2 meter braided Type-C to Type-C 100W 5A E-Marker cable for MacBook Pro';
+    } else if (presetType === 'powerbank65') {
+      queryText = '20000mAh power bank that can charge Dell Type-C laptop at 65W PD output';
+    } else if (presetType === 'wireless15') {
+      queryText = 'iPhone 15 Pro ke liye original Qi2 15W magnetic wireless charger pad';
+    } else {
+      queryText = presetType;
+    }
+
+    setNewReqInput(queryText);
+    setIsParsingAI(true);
+    try {
+      const parsed = await api.parseQuery(queryText);
+      const specs = parsed.specs || {};
+
+      // Match against backend-loaded catalogue to resolve SKU/barcode if present
+      const qLower = queryText.toLowerCase();
+      const matched = catalogue.find(
+        (p) =>
+          (p.sku && qLower.includes(p.sku.toLowerCase())) ||
+          (p.barcode && qLower.includes(p.barcode)) ||
+          (p.modelNumber && qLower.includes(p.modelNumber.toLowerCase()))
+      );
+
+      if (matched) {
+        setNewReqSku(matched.sku);
+        setScannedBarcode(matched.barcode || '');
+        setNewReqCategory(matched.category);
+        setNewReqSalePrice(matched.typicalSalePrice || matched.mrp);
+      } else {
+        const catMap = { CHARGERS: 'Charger', CABLES: 'Cable', POWER_BANKS: 'Power Bank', AUDIO: 'Audio' };
+        setNewReqCategory(catMap[parsed.category] || 'Accessory');
+      }
+
+      setNewReqMinWattage(parsed.wattage || specs.wattage || 0);
+      setNewReqConnector(parsed.connector || specs.connector_type || 'USB-C');
+      setNewReqProtocols(parsed.standards || (specs.standards ? specs.standards.join(', ') : ''));
+      triggerToast('Query Parsed by Backend NLP', `Extracted: ${parsed.wattage ? parsed.wattage + 'W' : 'Specs'}, ${parsed.connector}, ${parsed.standards}`, 'success');
+    } catch (err) {
+      triggerToast('NLP Parse Failed', `Backend error: ${err.message}`, 'error');
+    } finally {
       setIsParsingAI(false);
-    }, 260);
+    }
   };
 
   const handleScanBarcodePreset = (prod) => {
@@ -1070,119 +1032,120 @@ export default function App() {
     triggerToast(`Barcode Scanned: ${prod.barcode}`, `Auto-populated exact technical specs for ${prod.sku}.`, 'success');
   };
 
-  const handleCreateRequestSubmit = (e) => {
+  const handleCreateRequestSubmit = async (e) => {
     e.preventDefault();
-    const newId = `REQ-${1043 + requests.length - 4}`;
-    const matchedCatalog = catalogue.find((c) => c.sku === newReqSku) || catalogue[0];
-    const created = {
-      id: newId,
-      requestingStoreId: activeStoreId === 'network' ? 'store-a' : activeStoreId,
-      rawQuery: newReqInput,
-      category: newReqCategory,
-      requestedSku: newReqSku,
-      requestedBarcode: matchedCatalog.barcode,
-      requestedBrand: matchedCatalog.brand,
-      requiredSpecs: {
-        connector: newReqConnector,
-        minWattage: Number(newReqMinWattage),
-        protocols: newReqProtocols.split(',').map((s) => s.trim()).filter(Boolean)
-      },
-      quantity: Number(newReqQty) || 1,
-      customerDeadlineMins: Number(newReqDeadline) || 15,
-      allowSubstitutes: newReqAllowSub,
-      customerSalePrice: Number(newReqSalePrice) || 1200,
-      deliveryCost: 50,
-      platformFee: 20,
-      status: 'matched',
-      selectedCandidateId: null,
-      offerDetails: null,
-      reservationDetails: null,
-      createdAt: new Date().toTimeString().split(' ')[0],
-      updatedAt: new Date().toTimeString().split(' ')[0]
-    };
+    const reqStoreId = activeStoreId === 'network' ? 'store_np_apex' : activeStoreId;
 
-    setRequests((prev) => [created, ...prev]);
-    setSelectedRequestId(newId);
-    setShowNewRequestModal(false);
-    logAudit(
-      `${stores.find((s) => s.id === created.requestingStoreId)?.name}`,
-      `Logged unmet customer request ${newId} (${created.requestedSku}, ${created.requiredSpecs.minWattage}W)`,
-      'request'
-    );
-    triggerToast(`Created ${newId}`, '4-stage deterministic & attribute matching completed across neighbourhood stores.', 'success');
-    navigateToPage('matching');
+    try {
+      // Dispatch to FastAPI backend
+      const res = await api.createRequest({
+        requestingStoreId: reqStoreId,
+        customerQuery: newReqInput,
+        quantity: Number(newReqQty) || 1,
+        allowSubstitutes: newReqAllowSub,
+        notes: `Category: ${newReqCategory}; Sku: ${newReqSku}; Specs: ${newReqConnector}, ${newReqMinWattage}W`
+      });
+
+      const created = adaptRequest(res, catalogue);
+
+      setRequests((prev) => [created, ...prev.filter((r) => r.id !== created.id)]);
+      setSelectedRequestId(created.id);
+      setShowNewRequestModal(false);
+      refetchRequestsAndInventory();
+      logAudit(
+        `${stores.find((s) => s.id === reqStoreId)?.name || reqStoreId}`,
+        `Logged unmet customer request ${created.id} (${created.requestedSku}, ${created.requiredSpecs.minWattage}W) [Backend Confirmed]`,
+        'request'
+      );
+      triggerToast(`Created ${created.id}`, `Persisted to backend with ${res.match_candidates?.length || 0} candidate(s) discovered.`, 'success');
+      navigateToPage('matching');
+    } catch (err) {
+      // Backend is authoritative — do not invent a local request ID on failure.
+      triggerToast(
+        'Request Creation Failed',
+        `Backend error: ${err.message}. Please ensure the backend is running and retry.`,
+        'error'
+      );
+    }
   };
 
-  const handleAddStockSubmit = (e) => {
+  const handleAddStockSubmit = async (e) => {
     e.preventDefault();
-    setInventory((prev) => {
-      const existing = prev.find((i) => i.storeId === newStockStore && i.productId === newStockProduct);
-      if (existing) {
-        return prev.map((i) =>
-          i.storeId === newStockStore && i.productId === newStockProduct
-            ? { ...i, onHand: Math.max(0, i.onHand + Number(newStockDelta)), lastUpdated: 'Just now' }
-            : i
+    try {
+      const updated = await api.adjustInventory({
+        storeId: newStockStore,
+        productId: newStockProduct,
+        quantityDelta: Number(newStockDelta)
+      });
+      // Update inventory state with the backend-confirmed record
+      setInventory((prev) => {
+        const others = prev.filter(
+          (i) => !(i.storeId === newStockStore && i.productId === newStockProduct)
+        );
+        return [...others, updated];
+      });
+      setShowAddStockModal(false);
+      logAudit(
+        'InventoryService',
+        `Updated stock for ${newStockProduct} at ${newStockStore.toUpperCase()} (delta: ${newStockDelta > 0 ? '+' : ''}${newStockDelta} units) [Backend Confirmed]`,
+        'info'
+      );
+      triggerToast(
+        'Inventory Updated',
+        `Backend stock record persisted. New on-hand: ${updated.onHand} unit(s).`,
+        'success'
+      );
+    } catch (err) {
+      if (err.status === 409) {
+        triggerToast(
+          'Stock Conflict (HTTP 409)',
+          `Cannot reduce inventory: ${err.message || 'Reduction would violate active reservation holds'}.`,
+          'error'
+        );
+      } else {
+        triggerToast(
+          'Stock Update Failed',
+          `Backend error: ${err.message}. No inventory change has been applied.`,
+          'error'
         );
       }
-      const prod = catalogue.find((p) => p.id === newStockProduct);
-      return [
-        ...prev,
-        {
-          id: `inv-${Date.now()}`,
-          storeId: newStockStore,
-          productId: newStockProduct,
-          onHand: Math.max(1, Number(newStockDelta)),
-          reserved: 0,
-          transferPrice: prod ? prod.typicalTransferPrice : 1000,
-          acquisitionCost: prod ? Math.round(prod.typicalTransferPrice * 0.84) : 840,
-          lastUpdated: 'Just now'
-        }
-      ];
-    });
-    setShowAddStockModal(false);
-    logAudit('InventoryService', `Updated stock for ${newStockProduct} at ${newStockStore.toUpperCase()} (+${newStockDelta} units)`, 'info');
-    triggerToast('Inventory Record Updated', 'Available quantity recalculated atomically.', 'success');
+      refetchRequestsAndInventory();
+    }
   };
 
-  const handleOnboardStoreSubmit = (e) => {
+  const handleOnboardStoreSubmit = async (e) => {
     e.preventDefault();
     if (!newStoreName.trim()) return;
-    const nextIdx = stores.length + 1;
-    const code = `SHP-${String.fromCharCode(64 + nextIdx)}`;
-    const newId = `store-${code.toLowerCase()}`;
-    const newSt = {
-      id: newId,
-      code,
-      name: newStoreName.trim(),
-      neighbourhood: newStoreBlock.trim(),
-      distanceMeters: Number(newStoreDistance) || 250,
-      distanceLabel: `${newStoreDistance}m · 3 min walk`,
-      owner: newStoreOwner.trim() || 'Store Manager',
-      role: 'Verified Neighbourhood Partner',
-      trustScore: 95,
-      avgConfirmMins: 2.0,
-      phone: '+91 98109 •••55',
-      completedTransfers: 0,
-      activeSince: 'Just Onboarded'
-    };
-    setStores((prev) => [...prev, newSt]);
-    // Seed 2 units of 65W charger for the newly onboarded store
-    setInventory((prev) => [
-      ...prev,
-      {
-        id: `inv-${Date.now()}`,
-        storeId: newId,
-        productId: 'prod-1',
-        onHand: 2,
-        reserved: 0,
-        transferPrice: 990,
-        acquisitionCost: 830,
-        lastUpdated: 'Just onboarded'
-      }
-    ]);
-    logAudit('StoreService', `Onboarded new partner store ${code} (${newSt.name}) into Nehru Place cluster.`, 'info');
-    triggerToast(`Partner Store ${code} Onboarded`, `${newSt.name} added to the neighbourhood inventory mesh with initial stock.`, 'success');
-    setNewStoreName('');
+    try {
+      const newSt = await api.createStore({
+        name: newStoreName.trim(),
+        ownerName: newStoreOwner.trim() || 'Store Manager',
+        phone: '+91 98109 00000',
+        neighbourhood: newStoreBlock.trim() || 'Nehru Place, New Delhi',
+        address: `${newStoreBlock.trim() || 'Nehru Place'}, New Delhi 110019`,
+        latitude: 28.5492,
+        longitude: 77.2528
+      });
+      // Use backend-issued ID and adapted store record
+      setStores((prev) => [...prev, newSt]);
+      logAudit(
+        'StoreService',
+        `Onboarded new partner store ${newSt.id} (${newSt.name}) into Nehru Place cluster [Backend Confirmed].`,
+        'info'
+      );
+      triggerToast(
+        `Partner Store Onboarded`,
+        `${newSt.name} (ID: ${newSt.id}) added to the neighbourhood mesh.`,
+        'success'
+      );
+      setNewStoreName('');
+    } catch (err) {
+      triggerToast(
+        'Store Onboarding Failed',
+        `Backend error: ${err.message}. No store was added.`,
+        'error'
+      );
+    }
   };
 
   const handleExportInventoryCsv = () => {
@@ -1210,12 +1173,28 @@ export default function App() {
     const reservedReqs = requests.filter((r) => r.status === 'reserved');
     const openOrActiveReqs = requests.filter((r) => ['open', 'matched', 'awaiting_supplier', 'offered'].includes(r.status));
 
-    const totalRecoveredRevenue = fulfilledReqs.reduce((acc, r) => acc + r.customerSalePrice * r.quantity, 0);
-    const totalRetailerContribution = fulfilledReqs.reduce((acc, r) => {
-      const tPrice = r.offerDetails ? r.offerDetails.transferPrice : 1000;
-      return acc + (r.customerSalePrice - tPrice - r.deliveryCost - r.platformFee) * r.quantity;
+    // For fulfilled requests, prefer the backend-authoritative settled amount (settledOutcome.customer_sale_price).
+    // Fall back to customerSalePrice (MRP estimate) only when no settled record exists.
+    // Skip requests where price is genuinely null to avoid synthetic revenue inflation.
+    const totalRecoveredRevenue = fulfilledReqs.reduce((acc, r) => {
+      const gmv = r.settledOutcome?.customer_sale_price ?? (r.customerSalePrice != null ? r.customerSalePrice * r.quantity : 0);
+      return acc + gmv;
     }, 0);
-    const totalPlatformFees = fulfilledReqs.reduce((acc, r) => acc + r.platformFee * r.quantity, 0);
+    const totalRetailerContribution = fulfilledReqs.reduce((acc, r) => {
+      if (r.settledOutcome?.requesting_store_margin != null) {
+        return acc + r.settledOutcome.requesting_store_margin;
+      }
+      // Pre-settlement estimate (may be inaccurate until backend refetch populates settledOutcome)
+      if (r.customerSalePrice == null) return acc; // Skip if price unknown
+      const tPrice = r.offerDetails ? r.offerDetails.transferPrice : 1000;
+      const totalSale = r.customerSalePrice * r.quantity;
+      const totalTransfer = tPrice * r.quantity;
+      const fee = Math.max(25, Math.round(totalSale * 0.025 * 100) / 100);
+      return acc + (totalSale - totalTransfer - r.deliveryCost - fee);
+    }, 0);
+    const totalPlatformFees = fulfilledReqs.reduce((acc, r) => {
+      return acc + (r.settledOutcome?.platform_fee ?? (r.platformFee * r.quantity));
+    }, 0);
     const recoveryRate = requests.length > 0 ? Math.round((fulfilledReqs.length / requests.length) * 100) : 0;
 
     return {
@@ -1515,6 +1494,25 @@ export default function App() {
 
         {/* ACTIVE PAGE VIEWPORT */}
         <section className="lg:col-span-9 xl:col-span-9.5 space-y-5 min-w-0">
+          {/* Global Backend Connection Error Banner with Retry */}
+          {domainError && (
+            <div className="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-800 dark:text-rose-200 flex flex-wrap items-center justify-between gap-3 animate-slide-up">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+                <div>
+                  <div className="text-sm font-semibold">Backend Connection Issue</div>
+                  <div className="text-xs opacity-90">{domainError}</div>
+                </div>
+              </div>
+              <button
+                onClick={loadDomainData}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-rose-600 text-white hover:bg-rose-700 transition-colors inline-flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Retry Connection
+              </button>
+            </div>
+          )}
+
           {/* Page Header & Quick Metric Strip */}
           <div className={`p-4 rounded-2xl border ${ui.cardBg} flex flex-wrap items-center justify-between gap-3`}>
             <div>
@@ -1742,37 +1740,65 @@ export default function App() {
                   </div>
 
                   <div className="divide-y divide-stone-200 dark:divide-zinc-800 max-h-[560px] overflow-y-auto">
-                    {requests.map((req) => {
-                      const isSelected = req.id === selectedRequest?.id;
-                      const reqStore = stores.find((s) => s.id === req.requestingStoreId);
-                      const stMeta = STATUS_META[req.status] || STATUS_META.open;
-                      const netContrib =
-                        req.customerSalePrice -
-                        (req.offerDetails?.transferPrice || 1000) -
-                        req.deliveryCost -
-                        req.platformFee;
-
-                      return (
-                        <div
-                          key={req.id}
-                          onClick={() => setSelectedRequestId(req.id)}
-                          className={`p-4 cursor-pointer transition-all ${
-                            isSelected
-                              ? isDark
-                                ? 'bg-[#1F2532] border-l-4 border-l-[#C84B20]'
-                                : 'bg-[#FBF6F0] border-l-4 border-l-[#C84B20]'
-                              : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
-                          }`}
+                    {domainLoading ? (
+                      <div className="p-8 text-center text-xs font-mono text-[#86868B]">
+                        <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#C84B20]" />
+                        Loading requests from backend...
+                      </div>
+                    ) : domainError ? (
+                      <div className="p-6 text-center text-xs font-mono">
+                        <div className="text-rose-600 dark:text-rose-400 font-semibold mb-2">
+                          Failed to load requests: {domainError}
+                        </div>
+                        <button
+                          onClick={loadDomainData}
+                          className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-mono font-bold hover:bg-rose-700 inline-flex items-center gap-1.5"
                         >
-                          <div className="flex items-center justify-between gap-2 mb-1.5">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-bold text-xs text-[#C84B20]">
-                                {req.id}
-                              </span>
-                              <span className={`text-xs font-mono ${ui.mutedText}`}>
-                                · {reqStore?.code} ({reqStore?.name.split(' ')[0]})
-                              </span>
-                            </div>
+                          <RefreshCw className="w-3.5 h-3.5" /> Retry
+                        </button>
+                      </div>
+                    ) : requests.length === 0 ? (
+                      <div className="p-8 text-center text-xs font-mono text-[#86868B]">
+                        No active stockout requests found.
+                      </div>
+                    ) : (
+                      requests.map((req) => {
+                        const isSelected = req.id === selectedRequest?.id;
+                        const reqStore = stores.find((s) => s.id === req.requestingStoreId);
+                        const stMeta = STATUS_META[req.status] || STATUS_META.open;
+                        const reqQty = req.quantity || 1;
+                        const totalReqSale = req.customerSalePrice != null ? req.customerSalePrice * reqQty : null;
+                        const totalReqTransfer = (req.offerDetails?.transferPrice || 1000) * reqQty;
+                        const estReqFee = totalReqSale != null ? Math.max(25, Math.round(totalReqSale * 0.025 * 100) / 100) : req.platformFee;
+                        const estReqMargin = totalReqSale != null
+                          ? Math.round((totalReqSale - totalReqTransfer - req.deliveryCost - estReqFee) * 100) / 100
+                          : null;
+                        const netContrib = req.settledOutcome?.requesting_store_margin ?? estReqMargin;
+                        const netContribLabel = netContrib != null
+                          ? `+₹${netContrib} ${req.settledOutcome ? 'settled' : 'est. contrib'}`
+                          : 'price unknown';
+
+                        return (
+                          <div
+                            key={req.id}
+                            onClick={() => setSelectedRequestId(req.id)}
+                            className={`p-4 cursor-pointer transition-all ${
+                              isSelected
+                                ? isDark
+                                  ? 'bg-[#1F2532] border-l-4 border-l-[#C84B20]'
+                                  : 'bg-[#FBF6F0] border-l-4 border-l-[#C84B20]'
+                                : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-xs text-[#C84B20]">
+                                  {req.id}
+                                </span>
+                                <span className={`text-xs font-mono ${ui.mutedText}`}>
+                                  · {reqStore?.code || '—'} {reqStore?.name ? `(${reqStore.name.split(' ')[0]})` : ''}
+                                </span>
+                              </div>
                             <span
                               className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
                                 isDark ? stMeta.darkBg : stMeta.bg
@@ -1794,7 +1820,7 @@ export default function App() {
                               {req.requiredSpecs.minWattage}W {req.requiredSpecs.connector}
                             </span>
                             <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
-                              +₹{netContrib} contrib
+                              {netContribLabel}
                             </span>
                           </div>
 
@@ -1811,7 +1837,8 @@ export default function App() {
                           )}
                         </div>
                       );
-                    })}
+                    })
+                  )}
                   </div>
                 </div>
               </div>
@@ -1845,17 +1872,25 @@ export default function App() {
 
                       <div className={`p-3 rounded-lg border ${ui.subCardBg} text-right font-mono`}>
                         <div className={`text-[10px] uppercase ${ui.mutedText}`}>
-                          Customer Sale Value
+                          {selectedRequest.settledOutcome
+                            ? `Settled Sale Price (Backend${selectedRequest.quantity > 1 ? ` · ${selectedRequest.quantity} units` : ''})`
+                            : selectedRequest.customerSalePriceSource === 'product_mrp_estimate'
+                              ? `Est. Sale Value (MRP${selectedRequest.quantity > 1 ? ` · ${selectedRequest.quantity} units` : ''})`
+                              : 'Customer Sale Value'}
                         </div>
                         <div className="text-lg font-bold tabular-nums">
-                          ₹{selectedRequest.customerSalePrice}
+                          {selectedRequest.settledOutcome
+                            ? `₹${selectedRequest.settledOutcome.customer_sale_price}${selectedRequest.quantity > 1 ? ` (₹${selectedRequest.customerSalePrice}/unit)` : ''}`
+                            : selectedRequest.customerSalePrice != null
+                              ? `₹${selectedRequest.customerSalePrice * selectedRequest.quantity}${selectedRequest.quantity > 1 ? ` (₹${selectedRequest.customerSalePrice}/unit)` : ''}`
+                              : <span className={`text-sm ${ui.mutedText}`}>Price unknown</span>}
                         </div>
                         <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">
-                          Target Contrib: +₹
-                          {selectedRequest.customerSalePrice -
-                            (selectedRequest.offerDetails?.transferPrice || 1000) -
-                            selectedRequest.deliveryCost -
-                            selectedRequest.platformFee}
+                          {selectedRequest.settledOutcome
+                            ? `Settled Margin: +₹${selectedRequest.settledOutcome.requesting_store_margin}`
+                            : selectedRequest.customerSalePrice != null
+                              ? `Est. Contrib: +₹${Math.round(((selectedRequest.customerSalePrice * selectedRequest.quantity) - ((selectedRequest.offerDetails?.transferPrice || 1000) * selectedRequest.quantity) - selectedRequest.deliveryCost - Math.max(25, (selectedRequest.customerSalePrice * selectedRequest.quantity) * 0.025)) * 100) / 100}`
+                              : 'Margin: unavailable'}
                         </div>
                       </div>
                     </div>
@@ -2013,13 +2048,38 @@ export default function App() {
                                 </span>
                               </div>
                               <h3 className="text-base font-bold mt-1">
-                                1 unit locked at{' '}
+                                {selectedRequest.quantity} unit{selectedRequest.quantity > 1 ? 's' : ''} locked at{' '}
                                 {stores.find((s) => s.id === selectedRequest.offerDetails?.supplierStoreId)?.name}.
                                 Available stock decremented atomically.
                               </h3>
+                              <p className={`text-xs mt-0.5 ${ui.mutedText}`}>
+                                Catalogue MRP: ₹{selectedRequest.customerSalePrice != null ? selectedRequest.customerSalePrice : '—'}/unit (Est.) · Leave sale price empty to use MRP default, or enter negotiated counter price.
+                              </p>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-3">
+                              <div className="flex items-center gap-1.5">
+                                <label className="text-xs font-mono font-bold opacity-90">Handover PIN:</label>
+                                <input
+                                  type="text"
+                                  placeholder={selectedRequest.reservationDetails.handoverCode}
+                                  value={handoverOtpInput}
+                                  onChange={(e) => setHandoverOtpInput(e.target.value)}
+                                  className={`w-28 px-2.5 py-1.5 rounded-lg border font-mono text-xs font-bold ${ui.subCardBg}`}
+                                />
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <label className="text-xs font-mono font-bold opacity-90">Sale Price/Unit (₹):</label>
+                                <input
+                                  type="number"
+                                  step="any"
+                                  placeholder={selectedRequest.customerSalePrice != null ? `${selectedRequest.customerSalePrice} (MRP)` : 'MRP Default'}
+                                  value={customActualPriceInput}
+                                  onChange={(e) => setCustomActualPriceInput(e.target.value)}
+                                  className={`w-32 px-2.5 py-1.5 rounded-lg border font-mono text-xs font-bold ${ui.subCardBg}`}
+                                  title="Leave empty to use catalogue MRP default, or enter customer-negotiated counter price per unit."
+                                />
+                              </div>
                               <button
                                 onClick={() => handleCompleteFulfilment(selectedRequest.id)}
                                 className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium flex items-center gap-1.5 shadow-xs"
@@ -2048,19 +2108,31 @@ export default function App() {
                               Lost sale recovered via{' '}
                               {stores.find((s) => s.id === selectedRequest.offerDetails.supplierStoreId)?.name}!
                             </h3>
-                            <p className={`text-xs mt-1 ${ui.mutedText}`}>
-                              Sale: ₹{selectedRequest.customerSalePrice} − Transfer: ₹
-                              {selectedRequest.offerDetails.transferPrice} − Runner: ₹{selectedRequest.deliveryCost} −
-                              Platform Fee: ₹{selectedRequest.platformFee} ={' '}
-                              <strong className="text-emerald-700 dark:text-emerald-300 font-semibold">
-                                +₹
-                                {selectedRequest.customerSalePrice -
-                                  selectedRequest.offerDetails.transferPrice -
-                                  selectedRequest.deliveryCost -
-                                  selectedRequest.platformFee}{' '}
-                                Incremental Contribution
-                              </strong>
-                            </p>
+                            {selectedRequest.settledOutcome ? (
+                              <p className={`text-xs mt-1 ${ui.mutedText}`}>
+                                GMV: ₹{selectedRequest.settledOutcome.customer_sale_price}{selectedRequest.quantity > 1 ? ` (₹${selectedRequest.customerSalePrice}/unit)` : ''} − Transfer: ₹{selectedRequest.settledOutcome.transfer_price_paid} − Runner: ₹{selectedRequest.settledOutcome.logistics_cost} − Platform Fee: ₹{selectedRequest.settledOutcome.platform_fee} ={' '}
+                                <strong className="text-emerald-700 dark:text-emerald-300 font-semibold">
+                                  +₹{selectedRequest.settledOutcome.requesting_store_margin} Incremental Contribution
+                                  <span className="ml-1 font-normal opacity-70">[Backend Authoritative]</span>
+                                </strong>
+                              </p>
+                            ) : selectedRequest.customerSalePrice != null ? (
+                              <p className={`text-xs mt-1 ${ui.mutedText}`}>
+                                Est. Sale: ₹{selectedRequest.customerSalePrice} − Transfer: ₹
+                                {selectedRequest.offerDetails.transferPrice} − Runner: ₹{selectedRequest.deliveryCost} −
+                                Platform Fee: ₹{selectedRequest.platformFee} ={' '}
+                                <strong className="text-emerald-700 dark:text-emerald-300 font-semibold">
+                                  +₹
+                                  {selectedRequest.customerSalePrice -
+                                    selectedRequest.offerDetails.transferPrice -
+                                    selectedRequest.deliveryCost -
+                                    selectedRequest.platformFee}{' '}
+                                  Incremental Contribution (estimated)
+                                </strong>
+                              </p>
+                            ) : (
+                              <p className={`text-xs mt-1 ${ui.mutedText}`}>Settlement figures loading from backend…</p>
+                            )}
                           </div>
                         </div>
                       )}
@@ -2213,6 +2285,33 @@ export default function App() {
                   </div>
                 </div>
               )}
+
+              {!selectedRequest && (
+                <div className={`xl:col-span-8 p-12 rounded-xl border text-center ${ui.cardBg} font-mono text-xs text-[#86868B]`}>
+                  {domainLoading ? (
+                    <div>
+                      <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#C84B20]" />
+                      Loading request details...
+                    </div>
+                  ) : domainError ? (
+                    <div>
+                      <div className="text-rose-600 dark:text-rose-400 font-semibold mb-2">
+                        Unable to load requests: {domainError}
+                      </div>
+                      <button
+                        onClick={loadDomainData}
+                        className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-mono font-bold hover:bg-rose-700 inline-flex items-center gap-1.5"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" /> Retry
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      No request selected. Select a request from the ledger or log a new stockout in the Capture Studio.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -2315,11 +2414,15 @@ export default function App() {
                         onChange={(e) => setNewReqSku(e.target.value)}
                         className={`w-full px-3 py-2 rounded-lg border ${ui.subCardBg}`}
                       >
-                        {catalogue.map((c) => (
-                          <option key={c.id} value={c.sku}>
-                            {c.sku} ({c.brand})
-                          </option>
-                        ))}
+                        {catalogue.length === 0 ? (
+                          <option value="">{domainLoading ? 'Loading catalogue...' : 'No products available'}</option>
+                        ) : (
+                          catalogue.map((c) => (
+                            <option key={c.id} value={c.sku}>
+                              {c.sku} ({c.brand})
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
 
@@ -2428,28 +2531,38 @@ export default function App() {
                   </p>
 
                   <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                    {catalogue.map((prod) => (
-                      <button
-                        key={prod.id}
-                        type="button"
-                        onClick={() => handleScanBarcodePreset(prod)}
-                        className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
-                          scannedBarcode === prod.barcode
-                            ? 'border-[#0071E3] bg-[#0071E3]/5'
-                            : `${ui.subCardBg} hover:border-[#0071E3]/40`
-                        }`}
-                      >
-                        <div>
-                          <div className="text-xs font-medium text-[#0071E3]">
-                            {prod.barcode} · {prod.sku}
+                    {domainLoading ? (
+                      <div className="p-4 text-center text-xs font-mono text-[#86868B]">
+                        Loading products...
+                      </div>
+                    ) : catalogue.length === 0 ? (
+                      <div className="p-4 text-center text-xs font-mono text-[#86868B]">
+                        No catalogue products available.
+                      </div>
+                    ) : (
+                      catalogue.map((prod) => (
+                        <button
+                          key={prod.id}
+                          type="button"
+                          onClick={() => handleScanBarcodePreset(prod)}
+                          className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                            scannedBarcode === prod.barcode
+                              ? 'border-[#0071E3] bg-[#0071E3]/5'
+                              : `${ui.subCardBg} hover:border-[#0071E3]/40`
+                          }`}
+                        >
+                          <div>
+                            <div className="text-xs font-medium text-[#0071E3]">
+                              {prod.barcode} · {prod.sku}
+                            </div>
+                            <div className="text-xs font-medium mt-0.5">{prod.name}</div>
                           </div>
-                          <div className="text-xs font-medium mt-0.5">{prod.name}</div>
-                        </div>
-                        <span className="text-[11px] px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 shrink-0 font-medium">
-                          Select
-                        </span>
-                      </button>
-                    ))}
+                          <span className="text-[11px] px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 shrink-0 font-medium">
+                            Select
+                          </span>
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -2836,60 +2949,89 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-200 dark:divide-zinc-800 text-xs">
-                    {filteredInventory.map((row) => (
-                      <tr key={row.id} className="hover:bg-black/[0.015] dark:hover:bg-white/[0.015]">
-                        <td className="py-3.5 px-4 font-mono">
-                          <span className="font-bold text-[#C84B20]">{row.store.code}</span>
-                          <div className="font-sans font-semibold text-xs">{row.store.name}</div>
-                          <div className={`text-[10px] ${ui.faintText}`}>{row.store.distanceLabel}</div>
-                        </td>
-                        <td className="py-3.5 px-4 font-mono">
-                          <div className="font-bold">{row.product.sku}</div>
-                          <div className={`text-[11px] ${ui.mutedText}`}>GTIN: {row.product.barcode}</div>
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <div className="font-bold text-sm">{row.product.name}</div>
-                          <div className="flex flex-wrap gap-1.5 mt-1 font-mono text-[11px]">
-                            <span className={`px-1.5 py-0.2 rounded border ${ui.subCardBg}`}>
-                              {row.product.attributes.wattage}W · {row.product.attributes.connector}
-                            </span>
-                            <span className={`px-1.5 py-0.2 rounded border ${ui.subCardBg}`}>
-                              {row.product.attributes.protocols.join(', ')}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold tabular-nums text-sm">
-                          {row.onHand}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono tabular-nums">
-                          {row.reserved > 0 ? (
-                            <span className="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-bold">
-                              {row.reserved} locked
-                            </span>
-                          ) : (
-                            <span className={ui.faintText}>0</span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono font-bold tabular-nums text-sm">
-                          <span
-                            className={`px-2.5 py-1 rounded ${
-                              row.available > 0
-                                ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
-                                : 'bg-rose-500/15 text-rose-700 dark:text-rose-300'
-                            }`}
-                          >
-                            {row.available}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono tabular-nums">
-                          <div className="font-bold">₹{row.transferPrice}</div>
-                          <div className={`text-[10px] ${ui.faintText}`}>MRP ₹{row.product.mrp}</div>
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono text-[11px]">
-                          {row.lastUpdated}
+                    {domainLoading ? (
+                      <tr>
+                        <td colSpan={8} className="py-12 text-center text-xs font-mono text-[#86868B]">
+                          <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#C84B20]" />
+                          Loading multi-store inventory ledger from backend...
                         </td>
                       </tr>
-                    ))}
+                    ) : domainError ? (
+                      <tr>
+                        <td colSpan={8} className="py-8 text-center text-xs font-mono">
+                          <div className="text-rose-600 dark:text-rose-400 font-semibold mb-2">
+                            Failed to load inventory records: {domainError}
+                          </div>
+                          <button
+                            onClick={loadDomainData}
+                            className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-mono font-bold hover:bg-rose-700 inline-flex items-center gap-1.5"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" /> Retry
+                          </button>
+                        </td>
+                      </tr>
+                    ) : filteredInventory.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-12 text-center text-xs font-mono text-[#86868B]">
+                          No inventory records found matching current criteria.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredInventory.map((row) => (
+                        <tr key={row.id} className="hover:bg-black/[0.015] dark:hover:bg-white/[0.015]">
+                          <td className="py-3.5 px-4 font-mono">
+                            <span className="font-bold text-[#C84B20]">{row.store.code}</span>
+                            <div className="font-sans font-semibold text-xs">{row.store.name}</div>
+                            <div className={`text-[10px] ${ui.faintText}`}>{row.store.distanceLabel}</div>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono">
+                            <div className="font-bold">{row.product.sku}</div>
+                            <div className={`text-[11px] ${ui.mutedText}`}>GTIN: {row.product.barcode}</div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-sm">{row.product.name}</div>
+                            <div className="flex flex-wrap gap-1.5 mt-1 font-mono text-[11px]">
+                              <span className={`px-1.5 py-0.2 rounded border ${ui.subCardBg}`}>
+                                {row.product.attributes.wattage}W · {row.product.attributes.connector}
+                              </span>
+                              <span className={`px-1.5 py-0.2 rounded border ${ui.subCardBg}`}>
+                                {row.product.attributes.protocols.join(', ')}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-mono font-bold tabular-nums text-sm">
+                            {row.onHand}
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-mono tabular-nums">
+                            {row.reserved > 0 ? (
+                              <span className="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 font-bold">
+                                {row.reserved} locked
+                              </span>
+                            ) : (
+                              <span className={ui.faintText}>0</span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-mono font-bold tabular-nums text-sm">
+                            <span
+                              className={`px-2.5 py-1 rounded ${
+                                row.available > 0
+                                  ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
+                                  : 'bg-rose-500/15 text-rose-700 dark:text-rose-300'
+                              }`}
+                            >
+                              {row.available}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-mono tabular-nums">
+                            <div className="font-bold">₹{row.transferPrice}</div>
+                            <div className={`text-[10px] ${ui.faintText}`}>MRP ₹{row.product.mrp}</div>
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-mono text-[11px]">
+                            {row.lastUpdated}
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -2904,37 +3046,61 @@ export default function App() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 {/* Participating Stores Cards */}
                 <div className="lg:col-span-8 space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {stores.map((st) => (
-                      <div key={st.id} className={`p-5 rounded-2xl border ${ui.cardBg} flex flex-col justify-between`}>
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="px-2.5 py-0.5 rounded bg-[#C84B20] text-white font-mono text-xs font-bold">
-                              {st.code}
-                            </span>
-                            <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
-                              {st.trustScore}% Trust · {st.avgConfirmMins}m confirm
-                            </span>
-                          </div>
-                          <h3 className="text-base font-bold">{st.name}</h3>
-                          <p className={`text-xs mt-0.5 ${ui.mutedText}`}>{st.neighbourhood}</p>
-                        </div>
-
-                        <div className="mt-4 pt-3 border-t border-stone-200 dark:border-zinc-800 flex items-center justify-between text-xs font-mono">
-                          <span>Owner: {st.owner}</span>
-                          <button
-                            onClick={() => {
-                              setActiveStoreId(st.id);
-                              navigateToPage('dispatch');
-                            }}
-                            className="text-[#C84B20] font-bold hover:underline"
-                          >
-                            Switch Terminal →
-                          </button>
-                        </div>
+                  {domainLoading ? (
+                    <div className={`p-8 rounded-2xl border text-center ${ui.cardBg} font-mono text-xs text-[#86868B]`}>
+                      <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#C84B20]" />
+                      Loading partner store network from backend...
+                    </div>
+                  ) : domainError ? (
+                    <div className={`p-6 rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300 flex items-center justify-between`}>
+                      <div>
+                        <div className="font-semibold text-sm">Failed to load partner stores</div>
+                        <div className="text-xs opacity-90 mt-0.5">{domainError}</div>
                       </div>
-                    ))}
-                  </div>
+                      <button
+                        onClick={loadDomainData}
+                        className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-mono font-bold hover:bg-rose-700 inline-flex items-center gap-1.5"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" /> Retry
+                      </button>
+                    </div>
+                  ) : stores.length === 0 ? (
+                    <div className={`p-8 rounded-2xl border text-center ${ui.cardBg} font-mono text-xs text-[#86868B]`}>
+                      No partner stores registered yet. Use the onboarding form to add your first node.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {stores.map((st) => (
+                        <div key={st.id} className={`p-5 rounded-2xl border ${ui.cardBg} flex flex-col justify-between`}>
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="px-2.5 py-0.5 rounded bg-[#C84B20] text-white font-mono text-xs font-bold">
+                                {st.code}
+                              </span>
+                              <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
+                                {st.trustScore}% Trust · {st.avgConfirmMins}m confirm
+                              </span>
+                            </div>
+                            <h3 className="text-base font-bold">{st.name}</h3>
+                            <p className={`text-xs mt-0.5 ${ui.mutedText}`}>{st.neighbourhood}</p>
+                          </div>
+
+                          <div className="mt-4 pt-3 border-t border-stone-200 dark:border-zinc-800 flex items-center justify-between text-xs font-mono">
+                            <span>Owner: {st.owner}</span>
+                            <button
+                              onClick={() => {
+                                setActiveStoreId(st.id);
+                                navigateToPage('dispatch');
+                              }}
+                              className="text-[#C84B20] font-bold hover:underline"
+                            >
+                              Switch Terminal →
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Section 5.6: Commercial Risks & Mitigations Table */}
                   <div className={`p-5 rounded-2xl border ${ui.cardBg}`}>
@@ -3046,42 +3212,66 @@ export default function App() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {AGGREGATE_UNMET_DEMAND.map((item) => (
-                    <div key={item.sku} className={`p-5 rounded-xl border ${ui.subCardBg} flex flex-col justify-between`}>
-                      <div>
-                        <div className="flex items-center justify-between text-xs font-mono mb-1">
-                          <span className="font-bold text-[#C84B20]">{item.sku}</span>
-                          <span className={ui.mutedText}>Peak: {item.peakWindow}</span>
-                        </div>
-                        <div className="font-bold text-base leading-snug">{item.name}</div>
-                      </div>
-
-                      <div className="my-3 pt-3 border-t border-stone-200 dark:border-zinc-700 grid grid-cols-4 gap-2 font-mono text-xs">
-                        <div>
-                          <span className={`text-[10px] block ${ui.faintText}`}>Requests</span>
-                          <span className="font-bold text-sm">{item.weeklyRequests}</span>
-                        </div>
-                        <div>
-                          <span className={`text-[10px] block ${ui.faintText}`}>Recovered</span>
-                          <span className="font-bold text-sm text-emerald-600">{item.recoveredCount}</span>
-                        </div>
-                        <div>
-                          <span className={`text-[10px] block ${ui.faintText}`}>Deficit</span>
-                          <span className="font-bold text-sm text-rose-600">{item.unfulfilledCount}</span>
-                        </div>
-                        <div>
-                          <span className={`text-[10px] block ${ui.faintText}`}>Avg Contrib</span>
-                          <span className="font-bold text-sm text-[#C84B20]">+₹{item.avgMargin}</span>
-                        </div>
-                      </div>
-
-                      <div className="text-xs font-mono p-2.5 rounded-lg bg-black/5 dark:bg-white/5">
-                        <strong>Stocking Action:</strong> {item.recommendation}
-                      </div>
+                {domainLoading ? (
+                  <div className={`p-8 rounded-xl border text-center ${ui.subCardBg} font-mono text-xs text-[#86868B]`}>
+                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#C84B20]" />
+                    Loading demand patterns from backend...
+                  </div>
+                ) : domainError ? (
+                  <div className={`p-6 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300 flex items-center justify-between`}>
+                    <div>
+                      <div className="font-semibold text-sm">Failed to load demand insights</div>
+                      <div className="text-xs opacity-90 mt-0.5">{domainError}</div>
                     </div>
-                  ))}
-                </div>
+                    <button
+                      onClick={loadDomainData}
+                      className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-mono font-bold hover:bg-rose-700 inline-flex items-center gap-1.5"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Retry
+                    </button>
+                  </div>
+                ) : demandInsights.length === 0 ? (
+                  <div className={`p-8 rounded-xl border text-center ${ui.subCardBg} font-mono text-xs text-[#86868B]`}>
+                    No demand insight records found. Log stockouts to begin aggregating cluster trends.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {demandInsights.map((item) => (
+                      <div key={item.sku} className={`p-5 rounded-xl border ${ui.subCardBg} flex flex-col justify-between`}>
+                        <div>
+                          <div className="flex items-center justify-between text-xs font-mono mb-1">
+                            <span className="font-bold text-[#C84B20]">{item.sku}</span>
+                            <span className={ui.mutedText}>Peak: {item.peakWindow}</span>
+                          </div>
+                          <div className="font-bold text-base leading-snug">{item.name}</div>
+                        </div>
+
+                        <div className="my-3 pt-3 border-t border-stone-200 dark:border-zinc-700 grid grid-cols-4 gap-2 font-mono text-xs">
+                          <div>
+                            <span className={`text-[10px] block ${ui.faintText}`}>Requests</span>
+                            <span className="font-bold text-sm">{item.weeklyRequests}</span>
+                          </div>
+                          <div>
+                            <span className={`text-[10px] block ${ui.faintText}`}>Recovered</span>
+                            <span className="font-bold text-sm text-emerald-600">{item.recoveredCount}</span>
+                          </div>
+                          <div>
+                            <span className={`text-[10px] block ${ui.faintText}`}>Deficit</span>
+                            <span className="font-bold text-sm text-rose-600">{item.unfulfilledCount}</span>
+                          </div>
+                          <div>
+                            <span className={`text-[10px] block ${ui.faintText}`}>Avg Contrib</span>
+                            <span className="font-bold text-sm text-[#C84B20]">+₹{item.avgMargin}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-xs font-mono p-2.5 rounded-lg bg-black/5 dark:bg-white/5">
+                          <strong>Stocking Action:</strong> {item.recommendation}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -3091,12 +3281,64 @@ export default function App() {
           ================================================================ */}
           {(activeTab === 'economics' || activeTab === 'architecture') && (
             <div className="space-y-6 animate-slide-up">
+              {/* Authoritative Realised Settlement Metrics from Backend */}
+              <div className={`p-5 rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5`}>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-600 text-white">
+                      Authoritative Backend Settlement Ledger (GET /api/summary)
+                    </span>
+                    <h3 className="text-base font-bold mt-1">
+                      Realised Network Settlements & Margin Realisation
+                    </h3>
+                  </div>
+                  <span className="text-xs font-mono text-emerald-700 dark:text-emerald-300 font-semibold">
+                    Persisted in SQLite DB · Deterministic Platform Fee Formula
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                  <div className={`p-3 rounded-xl border ${ui.cardBg}`}>
+                    <span className={`text-[10px] block ${ui.faintText}`}>Total Recovered GMV</span>
+                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                      ₹{financialSummary?.total_recovered_gmv ? financialSummary.total_recovered_gmv.toLocaleString('en-IN') : '0'}
+                    </span>
+                    <span className={`text-[10px] block mt-0.5 ${ui.mutedText}`}>
+                      {financialSummary?.completed_fulfilments_count || 0} completed transfers
+                    </span>
+                  </div>
+                  <div className={`p-3 rounded-xl border ${ui.cardBg}`}>
+                    <span className={`text-[10px] block ${ui.faintText}`}>Requesting Stores Margin</span>
+                    <span className="text-lg font-bold text-[#C84B20]">
+                      ₹{financialSummary?.total_requesting_store_margin ? financialSummary.total_requesting_store_margin.toLocaleString('en-IN') : '0'}
+                    </span>
+                    <span className={`text-[10px] block mt-0.5 ${ui.mutedText}`}>Walk-in sales preserved</span>
+                  </div>
+                  <div className={`p-3 rounded-xl border ${ui.cardBg}`}>
+                    <span className={`text-[10px] block ${ui.faintText}`}>Supplying Stores Margin</span>
+                    <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                      ₹{financialSummary?.total_supplying_store_margin ? financialSummary.total_supplying_store_margin.toLocaleString('en-IN') : '0'}
+                    </span>
+                    <span className={`text-[10px] block mt-0.5 ${ui.mutedText}`}>Dead stock liquidated</span>
+                  </div>
+                  <div className={`p-3 rounded-xl border ${ui.cardBg}`}>
+                    <span className={`text-[10px] block ${ui.faintText}`}>Platform Net Revenue</span>
+                    <span className="text-lg font-bold text-amber-600 dark:text-amber-400">
+                      ₹{financialSummary?.total_platform_net_revenue ? financialSummary.total_platform_net_revenue.toLocaleString('en-IN') : '0'}
+                    </span>
+                    <span className={`text-[10px] block mt-0.5 ${ui.mutedText}`}>
+                      {financialSummary?.recovery_rate_pct || 0}% recovery rate
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 <div className={`lg:col-span-7 p-5 rounded-xl border ${ui.cardBg} space-y-5`}>
                   <div className="border-b border-stone-200 dark:border-zinc-800 pb-3 flex items-center justify-between">
                     <div>
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-[#C84B20] font-bold">
-                        Section 5.2 · Illustrative Unit Economics & Break-Even Model
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold">
+                        Section 5.2 · Hypothetical Projection Simulator (Non-Authoritative)
                       </span>
                       <h2 className="text-lg font-bold mt-0.5">
                         Interactive Per-Transaction Contribution & Volume Simulator
@@ -3535,11 +3777,15 @@ export default function App() {
                     onChange={(e) => setNewReqSku(e.target.value)}
                     className={`w-full px-3 py-2 rounded-lg border ${ui.subCardBg}`}
                   >
-                    {catalogue.map((c) => (
-                      <option key={c.id} value={c.sku}>
-                        {c.sku} ({c.brand})
-                      </option>
-                    ))}
+                    {catalogue.length === 0 ? (
+                      <option value="">{domainLoading ? 'Loading catalogue...' : 'No products available'}</option>
+                    ) : (
+                      catalogue.map((c) => (
+                        <option key={c.id} value={c.sku}>
+                          {c.sku} ({c.brand})
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
 
@@ -3604,11 +3850,15 @@ export default function App() {
                   onChange={(e) => setNewStockStore(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border ${ui.subCardBg}`}
                 >
-                  {stores.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.code} · {s.name}
-                    </option>
-                  ))}
+                  {stores.length === 0 ? (
+                    <option value="">{domainLoading ? 'Loading stores...' : 'No stores available'}</option>
+                  ) : (
+                    stores.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.code} · {s.name}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
               <div>
@@ -3618,11 +3868,15 @@ export default function App() {
                   onChange={(e) => setNewStockProduct(e.target.value)}
                   className={`w-full px-3 py-2 rounded-lg border ${ui.subCardBg}`}
                 >
-                  {catalogue.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.sku} — {p.name}
-                    </option>
-                  ))}
+                  {catalogue.length === 0 ? (
+                    <option value="">{domainLoading ? 'Loading catalogue...' : 'No products available'}</option>
+                  ) : (
+                    catalogue.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.sku} — {p.name}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
               <div>

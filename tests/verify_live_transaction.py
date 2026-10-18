@@ -4,10 +4,10 @@ import json
 BASE = "http://127.0.0.1:8000"
 client = httpx.Client()
 
-print("--- Step 1: Create stockout request at Shop A ---")
+print("--- Step 1: Create stockout request at Shop A (Apex Mobile, Nehru Place) ---")
 req_payload = {
-    "requesting_store_id": "store_gupta_mobile",
-    "customer_query": "Samsung 25W Type-C Adapter fast charger EP-TA800",
+    "requesting_store_id": "store_np_apex",
+    "customer_query": "Anker 65W GaN USB-C charger A2663 for laptop and phone",
     "quantity": 1,
     "allow_substitutes": True,
     "notes": "Walk-in customer urgent"
@@ -50,7 +50,7 @@ print(f"Fulfilment record ready: {ful_id}, handover verification code: {code}")
 print("\n--- Step 6 & 7: Handover verification and commercial settlement ---")
 comp_payload = {
     "handover_code": code,
-    "actual_customer_price": 1299.0,
+    "actual_customer_price": 2499.0,
     "logistics_cost": 0.0
 }
 r4 = client.post(f"{BASE}/api/fulfilments/{ful_id}/complete", json=comp_payload).json()

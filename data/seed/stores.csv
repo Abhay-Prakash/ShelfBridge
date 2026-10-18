@@ -1,0 +1,5 @@
+id,name,owner_name,phone,neighbourhood,address,latitude,longitude,is_active
+store_np_apex,Apex Mobile & Tech (Simulated),Rajesh Verma,+91 98112 00141,Nehru Place · Block B (Ground Floor),"Shop G-12, Block B, Nehru Place Commercial Complex, New Delhi 110019",28.5492,77.2528,True
+store_np_metrovolt,MetroVolt Electronics (Simulated),Vikram Sethi,+91 98180 00292,Nehru Place · Block C (180m walk),"Shop 104, 1st Floor, Block C, Nehru Place, New Delhi 110019",28.5501,77.2536,True
+store_np_quickcharge,QuickCharge Accessory Hub (Simulated),Amanpreet Singh,+91 99104 00318,Nehru Place · Arcade Lane (310m walk),"Shop 22, Arcade Lane, Nehru Place, New Delhi 110019",28.5484,77.2545,True
+store_np_gadgetpoint,GadgetPoint Care & Spares (Simulated),Faizan Ahmed,+91 98115 00455,Nehru Place · West Wing (220m walk),"Shop 5, Basement Wing, International Trade Tower, Nehru Place, New Delhi 110019",28.5498,77.2515,True
